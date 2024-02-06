@@ -21,28 +21,33 @@ import * as config from "../config/config.json";
 
 const prisciluId = "Priscilu";
 
-class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
+class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
+{
     mod: string
     logger: ILogger
     names: Map<string, string>
 
     private container: DependencyContainer
 
-    constructor() {
+    constructor()
+    {
         this.mod = "SkyTweaks"; // Set name of mod, so we can log it to console later
         this.names = new Map<string, string>()
     }
 
-    public preAkiLoad(container: DependencyContainer): void {
+    public preAkiLoad(container: DependencyContainer): void
+    {
         this.logger = container.resolve<ILogger>("WinstonLogger");
         this.logger.info(`[${this.mod}] preAki Loading... `)
         this.container = container
 
-        if (config.ragfair.betterRagfairSellChance) {
+        if (config.ragfair.betterRagfairSellChance) 
+        {
             // Override aki's ragfair offer sell chance calculation
             container.afterResolution("RagfairSellHelper", (_t, result: RagfairSellHelper) =>
             {
-                result.calculateSellChance = (averageOfferPriceRub: number, playerListedPriceRub: number, qualityMultiplier: number) => {
+                result.calculateSellChance = (averageOfferPriceRub: number, playerListedPriceRub: number, qualityMultiplier: number) => 
+                {
                     const chances = container.resolve<ConfigServer>("ConfigServer").getConfig<IRagfairConfig>(ConfigTypes.RAGFAIR).sell.chance
                     const base = chances.base * qualityMultiplier;
                     const result = base * Math.min(1, Math.pow(config.ragfair.overpriceSellChanceCoef, playerListedPriceRub / averageOfferPriceRub - 1))
@@ -56,7 +61,8 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         this.logger.info(`[${this.mod}] preAki Loaded`);
     }
 
-    public postDBLoad(container: DependencyContainer): void {
+    public postDBLoad(container: DependencyContainer): void
+    {
         this.logger.debug(`[${this.mod}] postDb Loading... `);
 
         const databaseServer: DatabaseServer = container.resolve<DatabaseServer>("DatabaseServer");
@@ -92,15 +98,20 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         this.logger.debug(`[${this.mod}] postDb Loaded`);
     }
 
-    private loadItemNames(tables: IDatabaseTables) {
+    private loadItemNames(tables: IDatabaseTables) 
+    {
         this.names.clear()
         const locals = tables.locales.global["en"]
         const dbItems = tables.templates.items
-        for (const dbItemsKey in dbItems) {
+        for (const dbItemsKey in dbItems) 
+        {
             const item = dbItems[dbItemsKey]
-            if (`${item._id} Name` in locals) {
+            if (`${item._id} Name` in locals) 
+            {
                 this.names[item._id] = locals[`${item._id} Name`]
-            } else {
+            } 
+            else 
+            {
                 this.names[item._id] = item._name
             }
             if (config.verboseLogging) this.logger.debug(`[${this.mod}] ${item._id}:${this.names[item._id]}`)
@@ -165,9 +176,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         traders["54cb57776803fa99248b456e"].base.insurance.max_return_hour = 1;
     }
 
-    private filterPriscilu(tables: IDatabaseTables) {
+    private filterPriscilu(tables: IDatabaseTables) 
+    {
         this.logger.info(`[${this.mod}] Filtering Priscilu's Items`)
-        if (!(prisciluId in tables.traders)) {
+        if (!(prisciluId in tables.traders)) 
+        {
             this.logger.warning(`[${this.mod}] Priscilu not installed, skipped.`)
             return
         }
@@ -176,9 +189,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         const exceptions = new Set<string>(config.Priscilu.filterException)
 
         let removed = 0
-        priscilu.assort.items = priscilu.assort.items.filter((item) => {
+        priscilu.assort.items = priscilu.assort.items.filter((item) => 
+        {
             const dbItem = dbItems[item._tpl]
-            if (exceptions.has(item._tpl) || dbItem._props.CanSellOnRagfair === false) {
+            if (exceptions.has(item._tpl) || dbItem._props.CanSellOnRagfair === false) 
+            {
                 return true;
             }
             removed++;
@@ -187,20 +202,25 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         this.logger.success(`[${this.mod}] Priscilu's Items removed: ${removed}`)
     }
 
-    private changeBossSpawnRate(tables: IDatabaseTables) {
+    private changeBossSpawnRate(tables: IDatabaseTables) 
+    {
         this.logger.info(`[${this.mod}] Modifying boss spawn rate`)
 
         const locations = tables.locations;
         const bossSpawn = config.bossSpawn
 
-        if (config.unifiedBossSpawn && !isNaN(config.unifiedBossSpawnChance)) {
+        if (config.unifiedBossSpawn && !isNaN(config.unifiedBossSpawnChance))
+        {
             this.logger.info(`[${this.mod}] Boss spawn rate is UNIFIED!`)
-            for (const i in locations) {
+            for (const i in locations) 
+            {
                 const location: ILocationData = locations[i];
-                if (i === "base") {
+                if (i === "base") 
+                {
                     continue
                 }
-                location.base.BossLocationSpawn.forEach((spawn) => {
+                location.base.BossLocationSpawn.forEach((spawn) =>
+                {
                     spawn.BossChance = config.unifiedBossSpawnChance
                     this.logger.success(`[${this.mod}] ${spawn.BossName}@${location.base.Name} (${i}) spawn chance: ${spawn.BossChance}%`);
                 })
@@ -210,18 +230,25 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
 
         this.logger.info(`[${this.mod}] Boss spawn rate is per boss.`)
 
-        for (const bName in bossSpawn) {
+        for (const bName in bossSpawn)
+        {
             const unified = bossSpawn[bName]["unified"] === true
-            if (unified) {
+            if (unified)
+            {
                 const chance = bossSpawn[bName]["unifiedSpawn"]
-                if (!isNaN(chance)) {
-                    for (const i in locations) {
+                if (!isNaN(chance))
+                {
+                    for (const i in locations)
+                    {
                         const location: ILocationData = locations[i];
-                        if (i === "base") {
+                        if (i === "base")
+                        {
                             continue
                         }
-                        location.base.BossLocationSpawn.forEach((spawn) => {
-                            if (spawn.BossName.toLowerCase() === bName.toLowerCase()) {
+                        location.base.BossLocationSpawn.forEach((spawn) =>
+                        {
+                            if (spawn.BossName.toLowerCase() === bName.toLowerCase())
+                            {
                                 spawn.BossChance = chance
                                 this.logger.success(`[${this.mod}] ${spawn.BossName}@${location.base.Name} (${i}) spawn chance: ${spawn.BossChance}%`);
                             }
@@ -233,25 +260,32 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         }
     }
 
-    private lockBotEquipment(tables: IDatabaseTables) {
+    private lockBotEquipment(tables: IDatabaseTables)
+    {
         this.logger.info(`[${this.mod}] Locking Bots' Equipments`)
         const bots = tables.bots.types
         const botsEquip = config.botsEquip
 
-        for (const botName in botsEquip) {
-            for (const equipLocation in botsEquip[botName]) {
+        for (const botName in botsEquip)
+        {
+            for (const equipLocation in botsEquip[botName])
+            {
                 const itemId = botsEquip[botName][equipLocation]
                 this.logger.debug(`[${this.mod}] ${botName}:${equipLocation}:${itemId}`)
-                if (itemId in tables.templates.items) {
+                if (itemId in tables.templates.items)
+                {
                     const bot = bots[botName]
                     const equipment: Record<string, number> = bot.inventory.equipment[equipLocation]
-                    for (const equipmentKey in equipment) {
+                    for (const equipmentKey in equipment)
+                    {
                         equipment[equipmentKey] = 0
                     }
                     equipment[itemId] = 100
                     bot.chances.equipment[equipLocation] = 100
                     this.logger.success(`[${this.mod}] ${botName}'s ${equipLocation} locked as <${this.names[itemId]}>`)
-                } else {
+                }
+                else
+                {
                     this.logger.warning(`[${this.mod}] item ${itemId} not found!`)
                 }
             }
@@ -260,15 +294,20 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
 
     }
 
-    private tweakPmcConversion(pmcConfig: IPmcConfig) {
+    private tweakPmcConversion(pmcConfig: IPmcConfig)
+    {
         this.logger.info(`[${this.mod}] Changing PMC conversion rate`)
         const conv = config.pmcConversion
 
-        for (const botName in conv) {
+        for (const botName in conv)
+        {
             const rate = conv[botName]
-            if (isNaN(rate)) {
+            if (isNaN(rate))
+            {
                 this.logger.error(`[${this.mod}] PMC from ${botName} conversion rate is not a number: ${rate}`)
-            } else {
+            }
+            else
+            {
                 pmcConfig.convertIntoPmcChance[botName].min = rate
                 pmcConfig.convertIntoPmcChance[botName].max = rate
                 this.logger.success(`[${this.mod}] PMC from ${botName} conversion rate: ${rate}%`)
@@ -276,14 +315,16 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         }
     }
 
-    private allowThingsInHolster(tables: IDatabaseTables) {
+    private allowThingsInHolster(tables: IDatabaseTables)
+    {
         this.logger.info(`[${this.mod}] Allowing things in holster`)
         const dbItems = tables.templates.items
         dbItems["55d7217a4bdc2d86028b456d"]._props.Slots[2]._props.filters[0].Filter.push("5447bedf4bdc2d87278b4568"); // grenade launcher
         dbItems["55d7217a4bdc2d86028b456d"]._props.Slots[2]._props.filters[0].Filter.push("5447b5e04bdc2d62278b4567"); // smg
     }
 
-    private updateRagfairSellChance(ragfairConfig: IRagfairConfig) {
+    private updateRagfairSellChance(ragfairConfig: IRagfairConfig)
+    {
         ragfairConfig.sell.chance.base = config.ragfair.baseSellChance
         ragfairConfig.sell.chance.minSellChancePercent = config.ragfair.minSellChance
         ragfairConfig.sell.chance.maxSellChancePercent = config.ragfair.maxSellChance
@@ -291,18 +332,22 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod {
         this.logger.success(`[${this.mod}] Ragfair sell chance: ${ragfairConfig.sell.chance.base}% [${ragfairConfig.sell.chance.minSellChancePercent}%, ${ragfairConfig.sell.chance.maxSellChancePercent}%] `)
     }
 
-    private lootMultiplier(locationConfig: ILocationConfig) {
+    private lootMultiplier(locationConfig: ILocationConfig)
+    {
         this.logger.info(`[${this.mod}] Multiplying loot`)
-        if (config.loot.useGlobal) {
+        if (config.loot.useGlobal)
+        {
             const globalMulti = config.loot.globalMultiplier
-            for (const location in locationConfig.looseLootMultiplier) {
+            for (const location in locationConfig.looseLootMultiplier)
+            {
                 locationConfig.looseLootMultiplier[location] *= globalMulti
                 locationConfig.staticLootMultiplier[location] *= globalMulti
                 this.logger.success(`[${this.mod}] ${location} loot multiplier: ${locationConfig.looseLootMultiplier[location]}, ${locationConfig.staticLootMultiplier[location]}`)
             }
             return
         }
-        for (const location in config.loot.locations) {
+        for (const location in config.loot.locations)
+        {
             const multi = config.loot.locations[location]
             locationConfig.looseLootMultiplier[location] *= multi
             locationConfig.staticLootMultiplier[location] *= multi
