@@ -1,20 +1,20 @@
-import { InventoryHelper } from "../helpers/InventoryHelper";
-import { ItemHelper } from "../helpers/ItemHelper";
-import { PresetHelper } from "../helpers/PresetHelper";
-import { WeightedRandomHelper } from "../helpers/WeightedRandomHelper";
-import { Preset } from "../models/eft/common/IGlobals";
-import { ITemplateItem } from "../models/eft/common/tables/ITemplateItem";
-import { AddItem } from "../models/eft/inventory/IAddItemRequestData";
-import { ISealedAirdropContainerSettings, RewardDetails } from "../models/spt/config/IInventoryConfig";
-import { LootItem } from "../models/spt/services/LootItem";
-import { LootRequest } from "../models/spt/services/LootRequest";
-import { ILogger } from "../models/spt/utils/ILogger";
-import { DatabaseServer } from "../servers/DatabaseServer";
-import { ItemFilterService } from "../services/ItemFilterService";
-import { LocalisationService } from "../services/LocalisationService";
-import { RagfairLinkedItemService } from "../services/RagfairLinkedItemService";
-import { HashUtil } from "../utils/HashUtil";
-import { RandomUtil } from "../utils/RandomUtil";
+import { InventoryHelper } from "@spt-aki/helpers/InventoryHelper";
+import { ItemHelper } from "@spt-aki/helpers/ItemHelper";
+import { PresetHelper } from "@spt-aki/helpers/PresetHelper";
+import { WeightedRandomHelper } from "@spt-aki/helpers/WeightedRandomHelper";
+import { IPreset } from "@spt-aki/models/eft/common/IGlobals";
+import { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
+import { AddItem } from "@spt-aki/models/eft/inventory/IAddItemRequestData";
+import { ISealedAirdropContainerSettings, RewardDetails } from "@spt-aki/models/spt/config/IInventoryConfig";
+import { LootItem } from "@spt-aki/models/spt/services/LootItem";
+import { LootRequest } from "@spt-aki/models/spt/services/LootRequest";
+import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import { ItemFilterService } from "@spt-aki/services/ItemFilterService";
+import { LocalisationService } from "@spt-aki/services/LocalisationService";
+import { RagfairLinkedItemService } from "@spt-aki/services/RagfairLinkedItemService";
+import { HashUtil } from "@spt-aki/utils/HashUtil";
+import { RandomUtil } from "@spt-aki/utils/RandomUtil";
 type ItemLimit = {
     current: number;
     max: number;
@@ -71,7 +71,7 @@ export declare class LootGenerator {
      * @param result array to add found preset to
      * @returns true if preset was valid and added to pool
      */
-    protected findAndAddRandomPresetToLoot(globalDefaultPresets: [string, Preset][], itemTypeCounts: Record<string, {
+    protected findAndAddRandomPresetToLoot(globalDefaultPresets: [string, IPreset][], itemTypeCounts: Record<string, {
         current: number;
         max: number;
     }>, itemBlacklist: string[], result: LootItem[]): boolean;
@@ -95,7 +95,7 @@ export declare class LootGenerator {
      * @param chosenWeaponPreset The weapon preset given to player as reward
      * @returns AddItem array
      */
-    protected getSealedContainerWeaponModRewards(containerSettings: ISealedAirdropContainerSettings, linkedItemsToWeapon: ITemplateItem[], chosenWeaponPreset: Preset): AddItem[];
+    protected getSealedContainerWeaponModRewards(containerSettings: ISealedAirdropContainerSettings, linkedItemsToWeapon: ITemplateItem[], chosenWeaponPreset: IPreset): AddItem[];
     /**
      * Handle event-related loot containers - currently just the halloween jack-o-lanterns that give food rewards
      * @param rewardContainerDetails
