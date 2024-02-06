@@ -7,6 +7,7 @@
 /.github
 /.gitignore
 /.gitlab
+/.idea
 /.nvmrc
 /.prettierrc
 /.vscode

@@ -7,9 +7,16 @@
       "5910968f86f77425cf569c32"
     ]
   },
-  "unifiedBossSpawn": false,
-  "unifiedBossSpawnChance": 50,
   "bossSpawn" : {
+    "enabled": true,
+    "unified": false,
+    "unifiedChance": 50,
+    "perBossSpawn": {
+      "gifter": {
+        "unified": true,
+        "unifiedChance": 100
+      }
+    }
   },
   "botsEquip" : {
     "bossbully": {
@@ -29,6 +36,7 @@
     "cancelWaitTime": 5
   },
   "loot": {
+    "enable": true,
     "useGlobal": false,
     "globalMultiplier": 10.0,
     "locations": {

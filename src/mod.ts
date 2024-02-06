@@ -77,20 +77,30 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.tweakItems(tables)
         this.noArmorRepairDamage(tables)
         this.tweakInsurance(tables, configServer)
-        this.changeBossSpawnRate(tables)
+
         this.lockBotEquipment(tables)
         this.tweakPmcConversion(pmcConfig)
         this.allowThingsInHolster(tables)
-        this.lootMultiplier(locationConfig)
+
 
         if (config.Priscilu.filterPriscilu)
         {
             this.filterPriscilu(tables)
         }
 
+        if (config.bossSpawn.enabled)
+        {
+            this.changeBossSpawnRate(tables)
+        }
+
         if (config.ragfair.betterRagfairSellChance)
         {
             this.updateRagfairSellChance(ragfairConfig)
+        }
+
+        if (config.loot.enable)
+        {
+            this.lootMultiplier(locationConfig)
         }
 
         // this.logger.info(`[${this.mod}] Misc`)
@@ -198,7 +208,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             {
                 return true;
             }
-            removed++;
+            removed++
             return false
         });
         this.logger.success(`[${this.mod}] Priscilu's Items removed: ${removed}`)
@@ -211,7 +221,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         const locations = tables.locations;
         const bossSpawn = config.bossSpawn
 
-        if (config.unifiedBossSpawn && !isNaN(config.unifiedBossSpawnChance))
+        if (bossSpawn.unified && !isNaN(bossSpawn.unifiedChance))
         {
             this.logger.info(`[${this.mod}] Boss spawn rate is UNIFIED!`)
             for (const i in locations) 
@@ -223,7 +233,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 }
                 location.base.BossLocationSpawn.forEach((spawn) =>
                 {
-                    spawn.BossChance = config.unifiedBossSpawnChance
+                    spawn.BossChance = bossSpawn.unifiedChance
                     this.logger.success(`[${this.mod}] ${spawn.BossName}@${location.base.Name} (${i}) spawn chance: ${spawn.BossChance}%`);
                 })
             }
@@ -232,12 +242,13 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         this.logger.info(`[${this.mod}] Boss spawn rate is per boss.`)
 
-        for (const bName in bossSpawn)
+        const perBoss = bossSpawn.perBossSpawn
+        for (const bName in perBoss)
         {
-            const unified = bossSpawn[bName]["unified"] === true
+            const unified = perBoss[bName]["unified"] === true
             if (unified)
             {
-                const chance = bossSpawn[bName]["unifiedSpawn"]
+                const chance = perBoss[bName]["unifiedChance"]
                 if (!isNaN(chance))
                 {
                     for (const i in locations)
