@@ -1,0 +1,33 @@
+{
+  "verboseLogging": false,
+  "PrisciluException": [
+    "591094e086f7747caa7bb2ef",
+    "5910968f86f77425cf569c32"
+  ],
+  "unifiedBossSpawn": false,
+  "unifiedBossSpawnChance": 50,
+  "bossSpawn" : {
+  },
+  "botsEquip" : {
+    "bossbully": {
+      "Holster": "5b3b713c5acfc4330140bd8d"
+    }
+  },
+  "pmcConversion": {
+    "pmcbot": 40
+  },
+  "ragfair": {
+    "betterRagfairSellChance": true,
+    "baseSellChance": 100,
+    "overpriceSellChanceCoef": 0.5,
+    "cancelWaitTime": 5
+  },
+  "loot": {
+    "useGlobal": false,
+    "globalMultiplier": 100.0,
+    "locations": {
+      "laboratory": 2.5,
+      "rezervbase": 2.5
+    }
+  }
+}
