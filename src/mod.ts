@@ -121,6 +121,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
     private tweakItems(tables: IDatabaseTables)
     {
+        this.logger.info(`[${this.mod}] Tweaking individual items`)
         const dbItems = tables.templates.items
         for (const id in dbItems)
         {
@@ -148,6 +149,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
     private noArmorRepairDamage(tables: IDatabaseTables)
     {
+        this.logger.info(`[${this.mod}] Removing armor repair damage`)
         const armorMats = tables.globals.config.ArmorMaterials
         for (const mat in armorMats)
         {
