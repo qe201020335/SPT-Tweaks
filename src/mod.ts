@@ -419,9 +419,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         fence.regenerateAssortsOnRefresh = conf.regenerateOnRefresh
         fence.chancePlateExistsInArmorPercent = conf.armorWithPlatesChance
 
-        fence.armorMaxDurabilityPercentMinMax = { min: conf.durability.min, max: conf.durability.max }
+        fence.armorMaxDurabilityPercentMinMax = { min: conf.maxDurability, max: conf.maxDurability }
         this.logger.success(`[${this.mod}] armor dura: [${fence.armorMaxDurabilityPercentMinMax.min}, ${fence.armorMaxDurabilityPercentMinMax.max}]`)
-        fence.presetMaxDurabilityPercentMinMax = { min: conf.durability.min, max: conf.durability.max }
+        fence.presetMaxDurabilityPercentMinMax = { min: conf.maxDurability, max: conf.maxDurability }
         this.logger.success(`[${this.mod}] preset dura: [${fence.presetMaxDurabilityPercentMinMax.min}, ${fence.presetMaxDurabilityPercentMinMax.max}]`)
 
         for (const type in fence.itemCategoryRoublePriceLimit)

@@ -53,10 +53,7 @@
       "priceMulti": 1.0,
       "regenerateOnRefresh": false,
       "armorWithPlatesChance": 100,
-      "durability": {
-        "min": 90,
-        "max": 100
-      },
+      "maxDurability": 100,
       "priceLimitMulti": 100.0,
       "filterBlacklist": true,
       "blacklistException": [
