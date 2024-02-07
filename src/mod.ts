@@ -4,7 +4,7 @@ import { DependencyContainer } from "tsyringe";
 import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
 import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
 import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
-import { ILocationData, ILocations } from "@spt-aki/models/spt/server/ILocations";
+import { ILocationData } from "@spt-aki/models/spt/server/ILocations";
 import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
 import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
 
@@ -18,6 +18,8 @@ import { ILocationConfig } from "@spt-aki/models/spt/config/ILocationConfig";
 import { IInsuranceConfig } from "@spt-aki/models/spt/config/IInsuranceConfig";
 
 import * as config from "../config/config.json";
+import { FenceConfig, ITraderConfig } from "@spt-aki/models/spt/config/ITraderConfig";
+import { MinMax } from "@spt-aki/models/common/MinMax";
 
 const prisciluId = "Priscilu";
 
@@ -72,6 +74,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         const pmcConfig = configServer.getConfig<IPmcConfig>(ConfigTypes.PMC)
         const ragfairConfig = configServer.getConfig<IRagfairConfig>(ConfigTypes.RAGFAIR)
         const locationConfig = configServer.getConfig<ILocationConfig>(ConfigTypes.LOCATION)
+        const traderConfig = configServer.getConfig<ITraderConfig>(ConfigTypes.TRADER)
 
         this.loadItemNames(tables)
         this.tweakItems(tables)
@@ -101,6 +104,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (config.loot.enable)
         {
             this.lootMultiplier(locationConfig)
+        }
+
+        if (config.trader.enable)
+        {
+            this.tweakTraders(traderConfig)
         }
 
         // this.logger.info(`[${this.mod}] Misc`)
@@ -368,6 +376,59 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         }
         
     }
+
+    private tweakTraders(traderConfig: ITraderConfig)
+    {
+        this.logger.info(`[${this.mod}] Tweaking traders`)
+        const trader = config.trader
+        traderConfig.purchasesAreFoundInRaid = trader.purchaseFIR
+        traderConfig.traderPriceMultipler *= trader.priceMulti
+        this.logger.success(`[${this.mod}] trader price multi: ${traderConfig.traderPriceMultipler}`)
+
+        this.tweakFence(traderConfig.fence)
+    }
+
+    private tweakFence(fence: FenceConfig)
+    {
+        this.logger.info(`[${this.mod}] Tweaking fence`)
+        const conf = config.trader.fence
+
+        //assort size
+        const sizeMulti = conf.assortSizeMulti
+        this.logger.success(`[${this.mod}] multiplying fence listing by ${sizeMulti}`)
+        fence.assortSize = Math.round(fence.assortSize * sizeMulti)
+        this.logger.success(`[${this.mod}] fence listing size: ${fence.assortSize}`)
+        fence.weaponPresetMinMax = this.scaleMinMax(fence.weaponPresetMinMax, sizeMulti, true)
+        this.logger.success(`[${this.mod}] guns: [${fence.weaponPresetMinMax.min}, ${fence.weaponPresetMinMax.max}]`)
+        fence.equipmentPresetMinMax = this.scaleMinMax(fence.equipmentPresetMinMax, sizeMulti, true)
+        this.logger.success(`[${this.mod}] equips: [${fence.equipmentPresetMinMax.min}, ${fence.equipmentPresetMinMax.max}]`)
+        for (const type in fence.itemTypeLimits)
+        {
+            fence.itemTypeLimits[type] = Math.round(Math.max(1, fence.itemTypeLimits[type]) * sizeMulti)
+            this.logger.success(`[${this.mod}] ${this.names[type]}: ${fence.itemTypeLimits[type]}`)
+        }
+
+        fence.itemPriceMult *= conf.priceMulti
+        fence.presetPriceMult *= conf.priceMulti
+        this.logger.success(`[${this.mod}] price multi: ${fence.itemPriceMult}, ${fence.presetPriceMult}`)
+
+        fence.regenerateAssortsOnRefresh = conf.regenerateOnRefresh
+        fence.chancePlateExistsInArmorPercent = conf.armorWithPlatesChance
+
+        fence.armorMaxDurabilityPercentMinMax = { min: conf.durability.min, max: conf.durability.max }
+        this.logger.success(`[${this.mod}] armor dura: [${fence.armorMaxDurabilityPercentMinMax.min}, ${fence.armorMaxDurabilityPercentMinMax.max}]`)
+        fence.presetMaxDurabilityPercentMinMax = { min: conf.durability.min, max: conf.durability.max }
+        this.logger.success(`[${this.mod}] preset dura: [${fence.presetMaxDurabilityPercentMinMax.min}, ${fence.presetMaxDurabilityPercentMinMax.max}]`)
+    }
+
+    private scaleMinMax(input: MinMax, multi: number, round: boolean): MinMax
+    {
+        return {
+            max: round ? Math.round(input.max * multi) : input.max,
+            min: round ? Math.round(input.min * multi) : input.min
+        }
+    }
+
 }
 
 module.exports = { mod: new SkyTweaks() }
