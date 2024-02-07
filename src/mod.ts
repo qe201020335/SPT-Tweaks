@@ -409,7 +409,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         }
         total += fence.weaponPresetMinMax.max
         total += fence.equipmentPresetMinMax.max
-        fence.assortSize = Math.ceil(Math.max(total, Math.round(fence.assortSize * sizeMulti)) / 100) * 100
+        fence.assortSize = Math.ceil(Math.max(total, Math.round(fence.assortSize * sizeMulti)) / 100 + sizeMulti) * 100
         this.logger.success(`[${this.mod}] fence total listing size: ${fence.assortSize}`)
 
         fence.itemPriceMult *= conf.priceMulti
