@@ -395,18 +395,22 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         //assort size
         const sizeMulti = conf.assortSizeMulti
-        this.logger.success(`[${this.mod}] multiplying fence listing by ${sizeMulti}`)
-        fence.assortSize = Math.round(fence.assortSize * sizeMulti)
-        this.logger.success(`[${this.mod}] fence listing size: ${fence.assortSize}`)
+        this.logger.info(`[${this.mod}] multiplying fence listing by ${sizeMulti}`)
         fence.weaponPresetMinMax = this.scaleMinMax(fence.weaponPresetMinMax, sizeMulti, true)
         this.logger.success(`[${this.mod}] guns: [${fence.weaponPresetMinMax.min}, ${fence.weaponPresetMinMax.max}]`)
         fence.equipmentPresetMinMax = this.scaleMinMax(fence.equipmentPresetMinMax, sizeMulti, true)
         this.logger.success(`[${this.mod}] equips: [${fence.equipmentPresetMinMax.min}, ${fence.equipmentPresetMinMax.max}]`)
+        let total = 0;
         for (const type in fence.itemTypeLimits)
         {
             fence.itemTypeLimits[type] = Math.round(Math.max(1, fence.itemTypeLimits[type]) * sizeMulti)
+            total += fence.itemTypeLimits[type]
             this.logger.success(`[${this.mod}] ${this.names[type]}: ${fence.itemTypeLimits[type]}`)
         }
+        total += fence.weaponPresetMinMax.max
+        total += fence.equipmentPresetMinMax.max
+        fence.assortSize = Math.ceil(Math.max(total, Math.round(fence.assortSize * sizeMulti)) / 100) * 100
+        this.logger.success(`[${this.mod}] fence total listing size: ${fence.assortSize}`)
 
         fence.itemPriceMult *= conf.priceMulti
         fence.presetPriceMult *= conf.priceMulti
@@ -419,6 +423,33 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.logger.success(`[${this.mod}] armor dura: [${fence.armorMaxDurabilityPercentMinMax.min}, ${fence.armorMaxDurabilityPercentMinMax.max}]`)
         fence.presetMaxDurabilityPercentMinMax = { min: conf.durability.min, max: conf.durability.max }
         this.logger.success(`[${this.mod}] preset dura: [${fence.presetMaxDurabilityPercentMinMax.min}, ${fence.presetMaxDurabilityPercentMinMax.max}]`)
+
+        for (const type in fence.itemCategoryRoublePriceLimit)
+        {
+            fence.itemCategoryRoublePriceLimit[type] = Math.round(fence.itemCategoryRoublePriceLimit[type] * conf.priceLimitMulti)
+            this.logger.success(`[${this.mod}] price limit ${fence.itemCategoryRoublePriceLimit[type]} for ${this.names[type]}`)
+        }
+
+
+        if (conf.filterBlacklist)
+        {
+            const bc: string[] = []
+            const exceptions = new Set(conf.blacklistException)
+            fence.blacklist.forEach((type) =>
+            {
+                if (exceptions.has(type))
+                {
+                    bc.push(type)
+                    this.logger.info(`[${this.mod}] kept in blacklist: ${type} <${this.names[type]}>`)
+                }
+                else
+                {
+                    this.logger.success(`[${this.mod}] removed from blacklist: ${type} <${this.names[type]}>`)
+                }
+            })
+            fence.blacklist = bc
+        }
+
     }
 
     private scaleMinMax(input: MinMax, multi: number, round: boolean): MinMax
