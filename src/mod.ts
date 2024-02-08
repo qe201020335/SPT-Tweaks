@@ -194,6 +194,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         traders["54cb50c76803fa8b248b4571"].base.insurance.max_return_hour = 1;
         traders["54cb57776803fa99248b456e"].base.insurance.min_return_hour = 0;
         traders["54cb57776803fa99248b456e"].base.insurance.max_return_hour = 1;
+
+        tables.locations.laboratory.base.Insurance = true
+        this.logger.success(`[${this.mod}] Insurance is working in The Lab`)
     }
 
     private filterPriscilu(tables: IDatabaseTables) 

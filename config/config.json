@@ -46,16 +46,16 @@
   },
   "trader": {
     "enable": true,
-    "purchaseFIR": true,
+    "purchaseFIR": false,
     "priceMulti": 1.0,
     "fence": {
-      "assortSizeMulti": 3.0,
+      "assortSizeMulti": 1.0,
       "priceMulti": 1.0,
       "regenerateOnRefresh": false,
       "armorWithPlatesChance": 100,
       "maxDurability": 100,
       "priceLimitMulti": 100.0,
-      "filterBlacklist": true,
+      "filterBlacklist": false,
       "blacklistException": [
         "5d52cc5ba4b9367408500062",
         "5d52d479a4b936793d58c76b",
