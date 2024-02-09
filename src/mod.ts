@@ -433,9 +433,18 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             this.logger.success(`[${this.mod}] price limit ${fence.itemCategoryRoublePriceLimit[type]} for ${this.names[type]}`)
         }
 
+        if (conf.alwaysFullPreset)
+        {
+            for (const type in fence.presetSlotsToRemoveChancePercent)
+            {
+                fence.presetSlotsToRemoveChancePercent[type] = 0
+            }
+        }
+
 
         if (conf.filterBlacklist)
         {
+            this.logger.info(`[${this.mod}] Removing things from Fence blacklist. Some items will be kept due to otherwise buggy behavior`)
             const bc: string[] = []
             const exceptions = new Set(conf.blacklistException)
             fence.blacklist.forEach((type) =>

@@ -49,21 +49,21 @@
     "purchaseFIR": false,
     "priceMulti": 1.0,
     "fence": {
-      "assortSizeMulti": 1.0,
+      "assortSizeMulti": 3.0,
       "priceMulti": 1.0,
       "regenerateOnRefresh": false,
       "armorWithPlatesChance": 100,
       "maxDurability": 100,
       "priceLimitMulti": 100.0,
-      "filterBlacklist": false,
+      "alwaysFullPreset": true,
+      "filterBlacklist": true,
       "blacklistException": [
         "5d52cc5ba4b9367408500062",
         "5d52d479a4b936793d58c76b",
         "65649eb40bf0ed77b8044453",
         "5448e54d4bdc2dcc718b4568",
         "5448e5284bdc2dcb718b4567",
-        "5a341c4086f77401f2541505",
-        "543be5cb4bdc2deb348b4568"
+        "5a341c4086f77401f2541505"
       ]
     }
   }
