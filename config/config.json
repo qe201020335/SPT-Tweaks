@@ -54,6 +54,7 @@
       "regenerateOnRefresh": false,
       "armorWithPlatesChance": 100,
       "maxDurability": 100,
+      "minCurrDurability": 90,
       "priceLimitMulti": 100.0,
       "alwaysFullPreset": true,
       "filterBlacklist": true,
@@ -62,7 +63,6 @@
         "5d52d479a4b936793d58c76b",
         "65649eb40bf0ed77b8044453",
         "5448e54d4bdc2dcc718b4568",
-        "5448e5284bdc2dcb718b4567",
         "5a341c4086f77401f2541505"
       ]
     }

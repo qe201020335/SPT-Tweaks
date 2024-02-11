@@ -422,10 +422,12 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         fence.regenerateAssortsOnRefresh = conf.regenerateOnRefresh
         fence.chancePlateExistsInArmorPercent = conf.armorWithPlatesChance
 
-        fence.armorMaxDurabilityPercentMinMax = { min: conf.maxDurability, max: conf.maxDurability }
-        this.logger.success(`[${this.mod}] armor dura: [${fence.armorMaxDurabilityPercentMinMax.min}, ${fence.armorMaxDurabilityPercentMinMax.max}]`)
-        fence.presetMaxDurabilityPercentMinMax = { min: conf.maxDurability, max: conf.maxDurability }
-        this.logger.success(`[${this.mod}] preset dura: [${fence.presetMaxDurabilityPercentMinMax.min}, ${fence.presetMaxDurabilityPercentMinMax.max}]`)
+        fence.armorMaxDurabilityPercentMinMax.max = { min: conf.maxDurability, max: conf.maxDurability }
+        fence.armorMaxDurabilityPercentMinMax.current = { min: conf.minCurrDurability, max: conf.maxDurability }
+        this.logger.success(`[${this.mod}] armor dura: [${fence.armorMaxDurabilityPercentMinMax.current.min}, ${fence.armorMaxDurabilityPercentMinMax.max.max}]`)
+        fence.weaponDurabilityPercentMinMax.max = { min: conf.maxDurability, max: conf.maxDurability }
+        fence.weaponDurabilityPercentMinMax.current = { min: conf.minCurrDurability, max: conf.maxDurability }
+        this.logger.success(`[${this.mod}] preset dura: [${fence.weaponDurabilityPercentMinMax.current.min}, ${fence.weaponDurabilityPercentMinMax.max.max}]`)
 
         for (const type in fence.itemCategoryRoublePriceLimit)
         {
