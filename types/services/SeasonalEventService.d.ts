@@ -53,6 +53,15 @@ export declare class SeasonalEventService {
      * @returns array of tpl strings
      */
     getAllSeasonalEventItems(): string[];
+
+    /**
+     * Get an array of seasonal items that should not appear
+     * e.g. if halloween is active, only return christmas items
+     * or, if halloween and christmas are inactive, return both sets of items
+     * @returns array of tpl strings
+     */
+    getInactiveSeasonalEventItems(): string[]
+
     /**
      * Is a seasonal event currently active
      * @returns true if event is active

@@ -4,7 +4,7 @@ import { DependencyContainer } from "tsyringe";
 import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
 import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
 import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
-import { ILocationData } from "@spt-aki/models/spt/server/ILocations";
+import {ILocationData, ILocations} from "@spt-aki/models/spt/server/ILocations";
 import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
 import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
 
@@ -20,6 +20,16 @@ import { IInsuranceConfig } from "@spt-aki/models/spt/config/IInsuranceConfig";
 import * as config from "../config/config.json";
 import { FenceConfig, ITraderConfig } from "@spt-aki/models/spt/config/ITraderConfig";
 import { MinMax } from "@spt-aki/models/common/MinMax";
+import {ILocation} from "@spt-aki/models/eft/common/ILocation";
+import {ILooseLoot, Spawnpoint, SpawnpointsForced, SpawnpointTemplate} from "@spt-aki/models/eft/common/ILooseLoot";
+import {JsonUtil} from "@spt-aki/utils/JsonUtil";
+import {Item} from "@spt-aki/models/eft/common/tables/IItem";
+import {IStaticAmmoDetails} from "@spt-aki/models/eft/common/tables/ILootBase";
+import {LocationGenerator} from "@spt-aki/generators/LocationGenerator";
+import {SeasonalEventService} from "@spt-aki/services/SeasonalEventService";
+import {LocalisationService} from "@spt-aki/services/LocalisationService";
+import {ProbabilityObject, ProbabilityObjectArray} from "@spt-aki/utils/RandomUtil";
+import {MathUtil} from "@spt-aki/utils/MathUtil";
 
 const prisciluId = "Priscilu";
 
@@ -28,6 +38,8 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     mod: string
     logger: ILogger
     names: Map<string, string>
+    jsonUtil: JsonUtil
+    mathUtil: MathUtil
 
     private container: DependencyContainer
 
@@ -42,6 +54,8 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.logger = container.resolve<ILogger>("WinstonLogger");
         this.logger.info(`[${this.mod}] preAki Loading... `)
         this.container = container
+        this.jsonUtil = container.resolve<JsonUtil>("JsonUtil")
+        this.mathUtil = container.resolve<MathUtil>("MathUtil")
 
         if (config.ragfair.betterRagfairSellChance) 
         {
@@ -58,9 +72,142 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                     return rounded
                 }
             });
+            this.logger.success(`[${this.mod}] RagfairSellHelper functions hooked.`)
+        }
+
+        if (config.loot.enable && (config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_ || config.loot.forceAllSpawnPoints))
+        {
+            container.afterResolution("LocationGenerator", (_t, result: LocationGenerator) =>
+            {
+                result.generateDynamicLoot = (
+                    dynamicLootDist: ILooseLoot,
+                    staticAmmoDist: Record<string, IStaticAmmoDetails[]>,
+                    locationName: string
+                ): SpawnpointTemplate[] =>
+                {
+                    if (config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_) {
+                        this.logger.warning(`[${this.mod}] !!!FORCING ALL LOOSED LOOT TO SPAWN!!! EXPECT LOW IN-GAME PERFORMANCE!!!`)
+                    }
+                    const loot = this.generateDynamicLootOverwrite(result, dynamicLootDist, staticAmmoDist, locationName)
+                    this.logger.success(`[${this.mod}] Location ${locationName} total item spawn count: ${loot.length}`)
+                    return loot
+                }
+            })
+            this.logger.success(`[${this.mod}] LocationGenerator functions hooked.`)
         }
         
         this.logger.info(`[${this.mod}] preAki Loaded`);
+    }
+
+    private generateDynamicLootOverwrite(
+        self: LocationGenerator,
+        dynamicLootDist: ILooseLoot,
+        staticAmmoDist: Record<string, IStaticAmmoDetails[]>,
+        locationName: string,
+    ): SpawnpointTemplate[]
+    {
+        // some prep work for the protected fields
+        const seasonalEventService: SeasonalEventService = self["seasonalEventService"]
+        const localisationService: LocalisationService = self["localisationService"]
+        const locationConfig: ILocationConfig = self["locationConfig"]
+
+        const loot: SpawnpointTemplate[] = [];
+
+        // Add all forced loot to return array
+        // const addForcedLoot: (lootLocationTemplates: SpawnpointTemplate[], forcedSpawnPoints: SpawnpointsForced[], locationName: string) => void = self["addForcedLoot"]
+        self["addForcedLoot"](loot, dynamicLootDist.spawnpointsForced, locationName);
+
+        const blacklistedSpawnpoints = locationConfig.looseLootBlacklist[locationName];
+        const chosenSpawnpoints = dynamicLootDist.spawnpoints.filter((sp) =>
+        {
+            return !blacklistedSpawnpoints?.includes(sp.template.Id)
+        })
+
+        //=== skip all the random and probability crap ===
+
+        // Iterate over spawnpoints
+        const seasonalEventActive = seasonalEventService.seasonalEventEnabled();
+        const seasonalItemTplBlacklist = seasonalEventService.getInactiveSeasonalEventItems();
+        for (const spawnPoint of chosenSpawnpoints)
+        {
+            if (!spawnPoint.template)
+            {
+                this.logger.warning(
+                    localisationService.getText("location-missing_dynamic_template", spawnPoint.locationId),
+                );
+
+                continue;
+            }
+
+            if (!spawnPoint.template.Items || spawnPoint.template.Items.length === 0)
+            {
+                this.logger.error(
+                    localisationService.getText("location-spawnpoint_missing_items", spawnPoint.template.Id),
+                );
+
+                continue;
+            }
+
+            const itemArray = spawnPoint.itemDistribution.filter((itemDist) =>
+            {
+                const shouldNotKeep =
+                    !seasonalEventActive && seasonalItemTplBlacklist.includes(
+                        spawnPoint.template.Items.find((x) => x._id === itemDist.composedKey.key)._tpl,
+                    )
+                return !shouldNotKeep
+            })
+
+            if (itemArray.length === 0)
+            {
+                this.logger.warning(`Loot pool for position: ${spawnPoint.template.Id} is empty. Skipping`);
+
+                continue;
+            }
+
+            if (config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_)
+            {
+                // skip all the random crap, we want EVERY single possible item to ALL spawn
+                for (const itemDist of itemArray)
+                {
+                    const chosenComposedKey = itemDist.composedKey.key
+                    try
+                    {
+                        const createItemResult = self["createDynamicLootItem"](chosenComposedKey, spawnPoint, staticAmmoDist);
+
+                        // need to clone this
+                        // we are creating multiple spawns at the same spawn point
+                        const template = this.jsonUtil.clone(spawnPoint.template)
+                        template.useGravity = false // or it could take ages to simulation the physical
+                        // Root id can change when generating a weapon
+                        template.Root = createItemResult.items[0]._id;
+                        template.Items = createItemResult.items;
+
+                        loot.push(template);
+                    }
+                    catch (e)
+                    {
+                        this.logger.warning(`[${this.mod}] Failed to create loot ${itemDist} at ${spawnPoint.locationId}`);
+                    }
+                }
+            }
+            else
+            {
+                const probObjs = itemArray.map((item) => new ProbabilityObject(item.composedKey.key, item.relativeProbability))
+                const probArray = new ProbabilityObjectArray<string>(this.mathUtil, this.jsonUtil, ...probObjs);
+
+                // Draw a random item from spawn points possible items
+                const chosenComposedKey = probArray.draw(1)[0];
+                const createItemResult = self["createDynamicLootItem"](chosenComposedKey, spawnPoint, staticAmmoDist);
+
+                const template = this.jsonUtil.clone(spawnPoint.template)
+                // Root id can change when generating a weapon
+                template.Root = createItemResult.items[0]._id;
+                template.Items = createItemResult.items;
+
+                loot.push(template);
+            }
+        }
+        return loot
     }
 
     public postDBLoad(container: DependencyContainer): void
@@ -103,7 +250,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         if (config.loot.enable)
         {
-            this.lootMultiplier(locationConfig)
+            this.lootMultiplier(locationConfig, tables.locations)
         }
 
         if (config.trader.enable)
@@ -356,7 +503,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.logger.success(`[${this.mod}] Ragfair sell chance: ${ragfairConfig.sell.chance.base}% [${ragfairConfig.sell.chance.minSellChancePercent}%, ${ragfairConfig.sell.chance.maxSellChancePercent}%] `)
     }
 
-    private lootMultiplier(locationConfig: ILocationConfig)
+    private lootMultiplier(locationConfig: ILocationConfig, locations: ILocations)
     {
         this.logger.info(`[${this.mod}] Multiplying loot`)
         if (config.loot.useGlobal)
@@ -377,8 +524,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             locationConfig.staticLootMultiplier[location] *= multi
             this.logger.success(`[${this.mod}] ${location} loot multiplier: ${locationConfig.looseLootMultiplier[location]}, ${locationConfig.staticLootMultiplier[location]}`)
         }
-        
+
+        locationConfig.containerRandomisationSettings.enabled = !config.loot.disableContainerRandomization
     }
+
 
     private tweakTraders(traderConfig: ITraderConfig)
     {

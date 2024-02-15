@@ -42,7 +42,10 @@
     "locations": {
       "laboratory": 2.5,
       "rezervbase": 2.5
-    }
+    },
+    "disableContainerRandomization": true,
+    "forceAllSpawnPoints": false,
+    "_DANGER_forceSpawnAllLoosedLoot_DANEGR_": false
   },
   "trader": {
     "enable": true,
