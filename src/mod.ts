@@ -529,8 +529,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
                     const numSp = looseLoot.spawnpoints.length + looseLoot.spawnpointsForced.length
 
-                    // looseLoot.spawnpointCount.mean = numSp
-                    // looseLoot.spawnpointCount.std = 0
+                    // not necessary but older version of server doesn't respect IsAlwaysSpawn
+                    looseLoot.spawnpointCount.mean = numSp
+                    looseLoot.spawnpointCount.std = 0
 
                     this.logger.success(`[${this.mod}] ${locationName} has ${numSp} loose items`)
                 }
