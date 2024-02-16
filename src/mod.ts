@@ -75,7 +75,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             this.logger.success(`[${this.mod}] RagfairSellHelper functions hooked.`)
         }
 
-        if (config.loot.enable && (config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_ || config.loot.forceAllSpawnPoints))
+        if (config.loot.enable && config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_)
         {
             container.afterResolution("LocationGenerator", (_t, result: LocationGenerator) =>
             {
@@ -85,9 +85,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                     locationName: string
                 ): SpawnpointTemplate[] =>
                 {
-                    if (config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_) {
-                        this.logger.warning(`[${this.mod}] !!!FORCING ALL LOOSED LOOT TO SPAWN!!! EXPECT LOW IN-GAME PERFORMANCE!!!`)
-                    }
+                    this.logger.warning(`[${this.mod}] !!!FORCING ALL LOOSED LOOT TO SPAWN!!! EXPECT LOW IN-GAME PERFORMANCE!!!`)
                     const loot = this.generateDynamicLootOverwrite(result, dynamicLootDist, staticAmmoDist, locationName)
                     this.logger.success(`[${this.mod}] Location ${locationName} total item spawn count: ${loot.length}`)
                     return loot
@@ -164,47 +162,28 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 continue;
             }
 
-            if (config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_)
+            // skip all the random crap, we want EVERY single possible item to ALL spawn
+            for (const itemDist of itemArray)
             {
-                // skip all the random crap, we want EVERY single possible item to ALL spawn
-                for (const itemDist of itemArray)
+                const chosenComposedKey = itemDist.composedKey.key
+                try
                 {
-                    const chosenComposedKey = itemDist.composedKey.key
-                    try
-                    {
-                        const createItemResult = self["createDynamicLootItem"](chosenComposedKey, spawnPoint, staticAmmoDist);
+                    const createItemResult = self["createDynamicLootItem"](chosenComposedKey, spawnPoint, staticAmmoDist);
 
-                        // need to clone this
-                        // we are creating multiple spawns at the same spawn point
-                        const template = this.jsonUtil.clone(spawnPoint.template)
-                        template.useGravity = false // or it could take ages to simulation the physical
-                        // Root id can change when generating a weapon
-                        template.Root = createItemResult.items[0]._id;
-                        template.Items = createItemResult.items;
+                    // need to clone this
+                    // we are creating multiple spawns at the same spawn point
+                    const template = this.jsonUtil.clone(spawnPoint.template)
+                    template.useGravity = false // or it could take ages to simulation the physical
+                    // Root id can change when generating a weapon
+                    template.Root = createItemResult.items[0]._id;
+                    template.Items = createItemResult.items;
 
-                        loot.push(template);
-                    }
-                    catch (e)
-                    {
-                        this.logger.warning(`[${this.mod}] Failed to create loot ${itemDist} at ${spawnPoint.locationId}`);
-                    }
+                    loot.push(template);
                 }
-            }
-            else
-            {
-                const probObjs = itemArray.map((item) => new ProbabilityObject(item.composedKey.key, item.relativeProbability))
-                const probArray = new ProbabilityObjectArray<string>(this.mathUtil, this.jsonUtil, ...probObjs);
-
-                // Draw a random item from spawn points possible items
-                const chosenComposedKey = probArray.draw(1)[0];
-                const createItemResult = self["createDynamicLootItem"](chosenComposedKey, spawnPoint, staticAmmoDist);
-
-                const template = this.jsonUtil.clone(spawnPoint.template)
-                // Root id can change when generating a weapon
-                template.Root = createItemResult.items[0]._id;
-                template.Items = createItemResult.items;
-
-                loot.push(template);
+                catch (e)
+                {
+                    this.logger.warning(`[${this.mod}] Failed to create loot ${itemDist} at ${spawnPoint.locationId}`);
+                }
             }
         }
         return loot
@@ -526,6 +505,31 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         }
 
         locationConfig.containerRandomisationSettings.enabled = !config.loot.disableContainerRandomization
+
+        if (config.loot.forceAllSpawnPoints)
+        {
+            this.logger.info(`[${this.mod}] Forcing all loot spawn points`)
+            for (const locationName in locations)
+            {
+                // this.logger.debug(`[${this.mod}] Attempting ${locationName}`)
+                if (locationName != "base" && locationName != "hideout" && locations[locationName]["looseLoot"])
+                {
+                    const looseLoot: ILooseLoot = locations[locationName]["looseLoot"]
+
+                    looseLoot.spawnpoints.forEach((sp) =>
+                    {
+                        sp.template.IsAlwaysSpawn = true
+                    })
+
+                    const numSp = looseLoot.spawnpoints.length + looseLoot.spawnpointsForced.length
+
+                    // looseLoot.spawnpointCount.mean = numSp
+                    // looseLoot.spawnpointCount.std = 0
+
+                    this.logger.success(`[${this.mod}] ${locationName} has ${numSp} loose items`)
+                }
+            }
+        }
     }
 
 
