@@ -8,11 +8,11 @@
     ]
   },
   "bossSpawn" : {
-    "enabled": true,
+    "enabled": false,
     "unified": false,
     "unifiedChance": 50,
     "perBossSpawn": {
-      "gifter": {
+      "bossBully": {
         "unified": true,
         "unifiedChance": 100
       }
