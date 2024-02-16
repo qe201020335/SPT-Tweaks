@@ -69,5 +69,10 @@
         "5a341c4086f77401f2541505"
       ]
     }
+  },
+  "raid": {
+    "enable": true,
+    "extraTime": 60,
+    "chanceExtractsAlwaysAvailable": true
   }
 }

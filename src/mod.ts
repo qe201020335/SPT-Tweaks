@@ -30,6 +30,7 @@ import {SeasonalEventService} from "@spt-aki/services/SeasonalEventService";
 import {LocalisationService} from "@spt-aki/services/LocalisationService";
 import {ProbabilityObject, ProbabilityObjectArray} from "@spt-aki/utils/RandomUtil";
 import {MathUtil} from "@spt-aki/utils/MathUtil";
+import {ILocationBase} from "@spt-aki/models/eft/common/ILocationBase";
 
 const prisciluId = "Priscilu";
 
@@ -235,6 +236,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (config.trader.enable)
         {
             this.tweakTraders(traderConfig)
+        }
+
+        if (config.raid.enable)
+        {
+            this.tweakRaids(tables.locations)
         }
 
         // this.logger.info(`[${this.mod}] Misc`)
@@ -624,6 +630,42 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         return {
             max: round ? Math.round(input.max * multi) : input.max,
             min: round ? Math.round(input.min * multi) : input.min
+        }
+    }
+
+    private tweakRaids(locations: ILocations)
+    {
+        this.logger.info(`[${this.mod}] Changing raid settings`)
+        for (const locationName in locations)
+        {
+            if (locationName != "base" && locationName != "hideout" && locations[locationName]["base"])
+            {
+                const locationBase: ILocationBase = locations[locationName]["base"]
+
+                if (config.raid.chanceExtractsAlwaysAvailable)
+                {
+                    locationBase.exits.forEach((exit) =>
+                    {
+                        if (exit.Chance !== 100)
+                        {
+                            exit.Chance = 100
+                            this.logger.success(`[${this.mod}] ${exit.Name} in ${locationName} is always available`)
+                        }
+                    })
+                }
+
+                if (locationBase.EscapeTimeLimit)
+                {
+                    locationBase.EscapeTimeLimit += config.raid.extraTime
+                    this.logger.success(`[${this.mod}] ${locationName} raid time ${locationBase.EscapeTimeLimit} min`)
+                }
+
+                if (locationBase.exit_access_time)
+                {
+                    // this value seems to be unused, but we change it as well just in case
+                    locationBase.exit_access_time += config.raid.extraTime
+                }
+            }
         }
     }
 
