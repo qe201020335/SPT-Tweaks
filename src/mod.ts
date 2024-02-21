@@ -1,36 +1,34 @@
-import { DependencyContainer } from "tsyringe";
+import {DependencyContainer} from "tsyringe";
 
 // SPT types
-import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
-import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
+import {IPostDBLoadMod} from "@spt-aki/models/external/IPostDBLoadMod";
+import {IPreAkiLoadMod} from "@spt-aki/models/external/IPreAkiLoadMod";
+import {IDatabaseTables} from "@spt-aki/models/spt/server/IDatabaseTables";
 import {ILocationData, ILocations} from "@spt-aki/models/spt/server/ILocations";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import {ILogger} from "@spt-aki/models/spt/utils/ILogger";
+import {DatabaseServer} from "@spt-aki/servers/DatabaseServer";
 
 
-import { ConfigTypes } from "@spt-aki/models/enums/ConfigTypes";
-import { IPmcConfig } from "@spt-aki/models/spt/config/IPmcConfig";
-import { ConfigServer } from "@spt-aki/servers/ConfigServer";
-import { RagfairSellHelper } from "@spt-aki/helpers/RagfairSellHelper";
-import { IRagfairConfig } from "@spt-aki/models/spt/config/IRagfairConfig";
-import { ILocationConfig } from "@spt-aki/models/spt/config/ILocationConfig";
-import { IInsuranceConfig } from "@spt-aki/models/spt/config/IInsuranceConfig";
+import {ConfigTypes} from "@spt-aki/models/enums/ConfigTypes";
+import {IPmcConfig} from "@spt-aki/models/spt/config/IPmcConfig";
+import {ConfigServer} from "@spt-aki/servers/ConfigServer";
+import {RagfairSellHelper} from "@spt-aki/helpers/RagfairSellHelper";
+import {IRagfairConfig} from "@spt-aki/models/spt/config/IRagfairConfig";
+import {ILocationConfig} from "@spt-aki/models/spt/config/ILocationConfig";
+import {IInsuranceConfig} from "@spt-aki/models/spt/config/IInsuranceConfig";
 
 import * as config from "../config/config.json";
-import { FenceConfig, ITraderConfig } from "@spt-aki/models/spt/config/ITraderConfig";
-import { MinMax } from "@spt-aki/models/common/MinMax";
-import {ILocation} from "@spt-aki/models/eft/common/ILocation";
-import {ILooseLoot, Spawnpoint, SpawnpointsForced, SpawnpointTemplate} from "@spt-aki/models/eft/common/ILooseLoot";
+import {FenceConfig, ITraderConfig} from "@spt-aki/models/spt/config/ITraderConfig";
+import {MinMax} from "@spt-aki/models/common/MinMax";
+import {ILooseLoot, SpawnpointTemplate} from "@spt-aki/models/eft/common/ILooseLoot";
 import {JsonUtil} from "@spt-aki/utils/JsonUtil";
-import {Item} from "@spt-aki/models/eft/common/tables/IItem";
 import {IStaticAmmoDetails} from "@spt-aki/models/eft/common/tables/ILootBase";
 import {LocationGenerator} from "@spt-aki/generators/LocationGenerator";
 import {SeasonalEventService} from "@spt-aki/services/SeasonalEventService";
 import {LocalisationService} from "@spt-aki/services/LocalisationService";
-import {ProbabilityObject, ProbabilityObjectArray} from "@spt-aki/utils/RandomUtil";
 import {MathUtil} from "@spt-aki/utils/MathUtil";
 import {ILocationBase} from "@spt-aki/models/eft/common/ILocationBase";
+import {IHttpConfig} from "@spt-aki/models/spt/config/IHttpConfig";
 
 const prisciluId = "Priscilu";
 
@@ -202,6 +200,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         const ragfairConfig = configServer.getConfig<IRagfairConfig>(ConfigTypes.RAGFAIR)
         const locationConfig = configServer.getConfig<ILocationConfig>(ConfigTypes.LOCATION)
         const traderConfig = configServer.getConfig<ITraderConfig>(ConfigTypes.TRADER)
+
+        const httpConfig = configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
+
+        httpConfig.ip = config.httpIP
 
         this.loadItemNames(tables)
         this.tweakItems(tables)
