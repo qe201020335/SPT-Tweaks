@@ -8,11 +8,19 @@
     ]
   },
   "bossSpawn" : {
-    "enabled": false,
+    "enabled": true,
     "unified": false,
     "unifiedChance": 50,
     "perBossSpawn": {
       "bossBully": {
+        "unified": true,
+        "unifiedChance": 100
+      },
+      "bossTagilla": {
+        "unified": true,
+        "unifiedChance": 100
+      },
+      "bossSanitar": {
         "unified": true,
         "unifiedChance": 100
       }
@@ -33,7 +41,8 @@
     "overpriceSellChanceCoef": 0.5,
     "minSellChance": 20,
     "maxSellChance": 100,
-    "cancelWaitTime": 5
+    "cancelWaitTime": 5,
+    "accessLevel": 15
   },
   "loot": {
     "enable": true,

@@ -226,6 +226,8 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (config.ragfair.betterRagfairSellChance)
         {
             this.updateRagfairSellChance(ragfairConfig)
+            tables.globals.config.RagFair.minUserLevel = config.ragfair.accessLevel
+            this.logger.success(`[${this.mod}] ragfair min level: ${tables.globals.config.RagFair.minUserLevel}`)
         }
 
         if (config.loot.enable)
@@ -293,8 +295,18 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         dbItems["590c657e86f77412b013051d"]._props.MaxHpResource = 36000;
         dbItems["590c657e86f77412b013051d"]._props.hpResourceRate = 700;
+
+        // stash
         //"5811ce772459770e9e5f9532:Grids:0:_props:cellsV:148",
         dbItems["5811ce772459770e9e5f9532"]._props.Grids[0]._props.cellsV = 148
+
+        // sicc
+        dbItems["5d235bb686f77443f4331278"]._props.Grids[0]._props.cellsV = 8
+        dbItems["5d235bb686f77443f4331278"]._props.Grids[0]._props.cellsH = 8
+
+        // thermal bag
+        dbItems["5c093db286f7740a1b2617e3"]._props.Grids[0]._props.cellsV = 10
+        dbItems["5c093db286f7740a1b2617e3"]._props.Grids[0]._props.cellsH = 10
     }
 
     private noArmorRepairDamage(tables: IDatabaseTables)
