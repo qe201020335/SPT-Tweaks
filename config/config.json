@@ -1,6 +1,7 @@
 {
   "verboseLogging": false,
   "httpIP": "127.0.0.1",
+  "noFallDamage": false,
   "Priscilu": {
     "filterPriscilu": false,
     "filterException": [

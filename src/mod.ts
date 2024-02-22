@@ -214,6 +214,13 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.tweakPmcConversion(pmcConfig)
         this.allowThingsInHolster(tables)
 
+        if (config.noFallDamage)
+        {
+            const health = tables.globals.config.Health
+            health.Falling.DamagePerMeter = 0;
+            health.Falling.SafeHeight = 200;
+            this.logger.success(`[${this.mod}] no more fall damage`)
+        }
 
         if (config.Priscilu.filterPriscilu)
         {
