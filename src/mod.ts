@@ -545,7 +545,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
                     looseLoot.spawnpoints.forEach((sp) =>
                     {
-                        sp.template.IsAlwaysSpawn = true
+                        sp.probability = 1
                     })
 
                     const numSp = looseLoot.spawnpoints.length + looseLoot.spawnpointsForced.length
