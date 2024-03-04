@@ -17,7 +17,6 @@ import {IRagfairConfig} from "@spt-aki/models/spt/config/IRagfairConfig";
 import {ILocationConfig} from "@spt-aki/models/spt/config/ILocationConfig";
 import {IInsuranceConfig} from "@spt-aki/models/spt/config/IInsuranceConfig";
 
-import * as config from "../config/config.json";
 import {FenceConfig, ITraderConfig} from "@spt-aki/models/spt/config/ITraderConfig";
 import {MinMax} from "@spt-aki/models/common/MinMax";
 import {ILooseLoot, SpawnpointTemplate} from "@spt-aki/models/eft/common/ILooseLoot";
@@ -29,6 +28,9 @@ import {LocalisationService} from "@spt-aki/services/LocalisationService";
 import {MathUtil} from "@spt-aki/utils/MathUtil";
 import {ILocationBase} from "@spt-aki/models/eft/common/ILocationBase";
 import {IHttpConfig} from "@spt-aki/models/spt/config/IHttpConfig";
+import {TweakConfig, Serializer} from "./config";
+import path from "path";
+import fs from "node:fs";
 
 const prisciluId = "Priscilu";
 
@@ -39,6 +41,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     names: Map<string, string>
     jsonUtil: JsonUtil
     mathUtil: MathUtil
+    config: TweakConfig = new TweakConfig()
 
     private container: DependencyContainer
 
@@ -46,6 +49,24 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     {
         this.mod = "SkyTweaks"; // Set name of mod, so we can log it to console later
         this.names = new Map<string, string>()
+        this.loadOrCreateConfigFile()
+    }
+
+    private loadOrCreateConfigFile()
+    {
+        const configDir = path.resolve(__dirname, "..", "config")
+        const configPath = path.resolve(configDir, "config.json")
+        if (fs.existsSync(configPath))
+        {
+            fs.copyFileSync(configPath, configPath+".bak")
+            Serializer.populateFromJsonString(this.config, fs.readFileSync(configPath).toString())
+        }
+        else
+        {
+            fs.mkdirSync(configDir, {recursive: true})
+        }
+
+        fs.writeFileSync(configPath, Serializer.serializeToJsonString(this.config));
     }
 
     public preAkiLoad(container: DependencyContainer): void
@@ -56,7 +77,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.jsonUtil = container.resolve<JsonUtil>("JsonUtil")
         this.mathUtil = container.resolve<MathUtil>("MathUtil")
 
-        if (config.ragfair.betterRagfairSellChance) 
+        if (this.config.ragfair.betterRagfairSellChance)
         {
             // Override aki's ragfair offer sell chance calculation
             container.afterResolution("RagfairSellHelper", (_t, result: RagfairSellHelper) =>
@@ -65,7 +86,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 {
                     const chances = container.resolve<ConfigServer>("ConfigServer").getConfig<IRagfairConfig>(ConfigTypes.RAGFAIR).sell.chance
                     const base = chances.base * qualityMultiplier;
-                    const result = base * Math.min(1, Math.pow(config.ragfair.overpriceSellChanceCoef, playerListedPriceRub / averageOfferPriceRub - 1))
+                    const result = base * Math.min(1, Math.pow(this.config.ragfair.overpriceSellChanceCoef, playerListedPriceRub / averageOfferPriceRub - 1))
                     const rounded = Math.max(chances.minSellChancePercent, Math.min(chances.maxSellChancePercent, Math.round(result)))
                     this.logger.info(`[${this.mod}] ragfair offer ${playerListedPriceRub} (avg ${averageOfferPriceRub}), ${rounded}%`);
                     return rounded
@@ -74,7 +95,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             this.logger.success(`[${this.mod}] RagfairSellHelper functions hooked.`)
         }
 
-        if (config.loot.enable && config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_)
+        if (this.config.loot.enable && this.config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_)
         {
             container.afterResolution("LocationGenerator", (_t, result: LocationGenerator) =>
             {
@@ -203,23 +224,26 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         const httpConfig = configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
 
-        httpConfig.ip = config.httpIP
+        httpConfig.ip = this.config.httpIP
 
         this.loadItemNames(tables)
         this.tweakItems(tables)
         this.noArmorRepairDamage(tables)
         this.tweakInsurance(tables, configServer)
 
-        this.lockBotEquipment(tables)
+        if (this.config.botEquipments.enable)
+        {
+            this.lockBotEquipment(tables)
+        }
 
-        if (config.pmc.enable)
+        if (this.config.pmc.enable)
         {
             this.tweakPmc(pmcConfig)
         }
 
         this.allowThingsInHolster(tables)
 
-        if (config.noFallDamage)
+        if (this.config.noFallDamage)
         {
             const health = tables.globals.config.Health
             health.Falling.DamagePerMeter = 0;
@@ -227,34 +251,34 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             this.logger.success(`[${this.mod}] no more fall damage`)
         }
 
-        if (config.Priscilu.filterPriscilu)
+        if (this.config.priscilu.filterPriscilu)
         {
             this.filterPriscilu(tables)
         }
 
-        if (config.bossSpawn.enabled)
+        if (this.config.bossSpawn.enable)
         {
             this.changeBossSpawnRate(tables)
         }
 
-        if (config.ragfair.betterRagfairSellChance)
+        if (this.config.ragfair.betterRagfairSellChance)
         {
             this.updateRagfairSellChance(ragfairConfig)
-            tables.globals.config.RagFair.minUserLevel = config.ragfair.accessLevel
+            tables.globals.config.RagFair.minUserLevel = this.config.ragfair.accessLevel
             this.logger.success(`[${this.mod}] ragfair min level: ${tables.globals.config.RagFair.minUserLevel}`)
         }
 
-        if (config.loot.enable)
+        if (this.config.loot.enable)
         {
             this.lootMultiplier(locationConfig, tables.locations)
         }
 
-        if (config.trader.enable)
+        if (this.config.trader.enable)
         {
             this.tweakTraders(traderConfig)
         }
 
-        if (config.raid.enable)
+        if (this.config.raid.enable)
         {
             this.tweakRaids(tables.locations)
         }
@@ -280,7 +304,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             {
                 this.names[item._id] = item._name
             }
-            if (config.verboseLogging) this.logger.debug(`[${this.mod}] ${item._id}:${this.names[item._id]}`)
+            if (this.config.verboseLogging) this.logger.debug(`[${this.mod}] ${item._id}:${this.names[item._id]}`)
         }
         this.logger.info(`[${this.mod}] item names Loaded`)
     }
@@ -295,7 +319,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             if ((item._parent == "5c99f98d86f7745c314214b3" || item._parent == "5c164d2286f774194c5e69fa") && item._props.MaximumNumberOfUsage !== undefined)
             {
                 item._props.MaximumNumberOfUsage = 0
-                if (config.verboseLogging) this.logger.debug("[no usage limit] " + this.names[id])
+                if (this.config.verboseLogging) this.logger.debug("[no usage limit] " + this.names[id])
             }
             else if (item._props.MaxRepairDegradation !== undefined && item._props.MaxRepairKitDegradation !== undefined)
             {
@@ -303,7 +327,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 item._props.MaxRepairDegradation = 0;
                 item._props.MinRepairKitDegradation = 0;
                 item._props.MaxRepairKitDegradation = 0;
-                if (config.verboseLogging) this.logger.debug("[no repair damage] " + this.names[id])
+                if (this.config.verboseLogging) this.logger.debug("[no repair damage] " + this.names[id])
             }
         }
 
@@ -367,7 +391,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         }
         const priscilu = tables.traders[prisciluId]
         const dbItems = tables.templates.items
-        const exceptions = new Set<string>(config.Priscilu.filterException)
+        const exceptions = new Set<string>(this.config.priscilu.filterException)
 
         let removed = 0
         priscilu.assort.items = priscilu.assort.items.filter((item) => 
@@ -388,7 +412,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.logger.info(`[${this.mod}] Modifying boss spawn rate`)
 
         const locations = tables.locations;
-        const bossSpawn = config.bossSpawn
+        const bossSpawn = this.config.bossSpawn
 
         if (bossSpawn.unified && !isNaN(bossSpawn.unifiedChance))
         {
@@ -412,12 +436,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.logger.info(`[${this.mod}] Boss spawn rate is per boss.`)
 
         const perBoss = bossSpawn.perBossSpawn
-        for (const bName in perBoss)
+        for (const [bName, bossSpawn] of perBoss)
         {
-            const unified = perBoss[bName]["unified"] === true
-            if (unified)
+            if (bossSpawn.unified)
             {
-                const chance = perBoss[bName]["unifiedChance"]
+                const chance = bossSpawn.unifiedChance
                 if (!isNaN(chance))
                 {
                     for (const i in locations)
@@ -446,13 +469,12 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     {
         this.logger.info(`[${this.mod}] Locking Bots' Equipments`)
         const bots = tables.bots.types
-        const botsEquip = config.botsEquip
+        const botsEquip = this.config.botEquipments.equipmentLocks
 
-        for (const botName in botsEquip)
+        for (const [botName, equipLocks] of botsEquip)
         {
-            for (const equipLocation in botsEquip[botName])
+            for (const [equipLocation, itemId] of equipLocks)
             {
-                const itemId = botsEquip[botName][equipLocation]
                 this.logger.debug(`[${this.mod}] ${botName}:${equipLocation}:${itemId}`)
                 if (itemId in tables.templates.items)
                 {
@@ -475,7 +497,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
     private tweakPmc(pmcConfig: IPmcConfig)
     {
-        const pmc = config.pmc
+        const pmc = this.config.pmc
         pmcConfig.forceHealingItemsIntoSecure = pmc.forceHealingItemsIntoSecure
 
         if (pmc.filterLootBlacklist)
@@ -486,11 +508,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         }
 
         this.logger.info(`[${this.mod}] Changing PMC conversion rate`)
-        const pmcConv = pmc.pmcConversion
 
-        for (const botName in pmcConv)
+        for (const [botName, rate] of pmc.pmcConversion)
         {
-            const rate = pmcConv[botName]
             if (isNaN(rate))
             {
                 this.logger.error(`[${this.mod}] PMC from ${botName} conversion rate is not a number: ${rate}`)
@@ -513,19 +533,19 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
     private updateRagfairSellChance(ragfairConfig: IRagfairConfig)
     {
-        ragfairConfig.sell.chance.base = config.ragfair.baseSellChance
-        ragfairConfig.sell.chance.minSellChancePercent = config.ragfair.minSellChance
-        ragfairConfig.sell.chance.maxSellChancePercent = config.ragfair.maxSellChance
-        ragfairConfig.sell.expireSeconds = config.ragfair.cancelWaitTime
+        ragfairConfig.sell.chance.base = this.config.ragfair.baseSellChance
+        ragfairConfig.sell.chance.minSellChancePercent = this.config.ragfair.minSellChance
+        ragfairConfig.sell.chance.maxSellChancePercent = this.config.ragfair.maxSellChance
+        ragfairConfig.sell.expireSeconds = this.config.ragfair.cancelWaitTime
         this.logger.success(`[${this.mod}] Ragfair sell chance: ${ragfairConfig.sell.chance.base}% [${ragfairConfig.sell.chance.minSellChancePercent}%, ${ragfairConfig.sell.chance.maxSellChancePercent}%] `)
     }
 
     private lootMultiplier(locationConfig: ILocationConfig, locations: ILocations)
     {
         this.logger.info(`[${this.mod}] Multiplying loot`)
-        if (config.loot.useGlobal)
+        if (this.config.loot.useGlobalMultiplier)
         {
-            const globalMulti = config.loot.globalMultiplier
+            const globalMulti = this.config.loot.globalMultiplier
             for (const location in locationConfig.looseLootMultiplier)
             {
                 locationConfig.looseLootMultiplier[location] *= globalMulti
@@ -534,17 +554,16 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             }
             return
         }
-        for (const location in config.loot.locations)
+        for (const [location, multi] of this.config.loot.perLocationMultiplier)
         {
-            const multi = config.loot.locations[location]
             locationConfig.looseLootMultiplier[location] *= multi
             locationConfig.staticLootMultiplier[location] *= multi
             this.logger.success(`[${this.mod}] ${location} loot multiplier: ${locationConfig.looseLootMultiplier[location]}, ${locationConfig.staticLootMultiplier[location]}`)
         }
 
-        locationConfig.containerRandomisationSettings.enabled = !config.loot.disableContainerRandomization
+        locationConfig.containerRandomisationSettings.enabled = !this.config.loot.disableContainerRandomization
 
-        if (config.loot.forceAllSpawnPoints)
+        if (this.config.loot.forceAllSpawnPoints)
         {
             this.logger.info(`[${this.mod}] Forcing all loot spawn points`)
             for (const locationName in locations)
@@ -575,9 +594,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     private tweakTraders(traderConfig: ITraderConfig)
     {
         this.logger.info(`[${this.mod}] Tweaking traders`)
-        const trader = config.trader
+        const trader = this.config.trader
         traderConfig.purchasesAreFoundInRaid = trader.purchaseFIR
-        traderConfig.traderPriceMultipler *= trader.priceMulti
+        traderConfig.traderPriceMultipler *= trader.priceMultiplier
         this.logger.success(`[${this.mod}] trader price multi: ${traderConfig.traderPriceMultipler}`)
 
         this.tweakFence(traderConfig.fence)
@@ -586,7 +605,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     private tweakFence(fence: FenceConfig)
     {
         this.logger.info(`[${this.mod}] Tweaking fence`)
-        const conf = config.trader.fence
+        const conf = this.config.trader.fence
 
         //assort size
         const sizeMulti = conf.assortSizeMulti
@@ -680,7 +699,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             {
                 const locationBase: ILocationBase = locations[locationName]["base"]
 
-                if (config.raid.chanceExtractsAlwaysAvailable)
+                if (this.config.raid.chanceExtractsAlwaysAvailable)
                 {
                     locationBase.exits.forEach((exit) =>
                     {
@@ -694,14 +713,14 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
                 if (locationBase.EscapeTimeLimit)
                 {
-                    locationBase.EscapeTimeLimit += config.raid.extraTime
+                    locationBase.EscapeTimeLimit += this.config.raid.extraTime
                     this.logger.success(`[${this.mod}] ${locationName} raid time ${locationBase.EscapeTimeLimit} min`)
                 }
 
                 if (locationBase.exit_access_time)
                 {
                     // this value seems to be unused, but we change it as well just in case
-                    locationBase.exit_access_time += config.raid.extraTime
+                    locationBase.exit_access_time += this.config.raid.extraTime
                 }
             }
         }
