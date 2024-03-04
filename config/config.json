@@ -33,9 +33,20 @@
       "Holster": "5b3b713c5acfc4330140bd8d"
     }
   },
-  "pmcConversion": {
-    "pmcbot": 40,
-    "assault": 30
+  "pmc": {
+    "enable": true,
+    "forceHealingItemsIntoSecure": false,
+    "filterLootBlacklist": true,
+    "blacklistException": [
+      "59f32bb586f774757e1e8442",
+      "59f32c3b86f77472a31742f0",
+      "6087e570b998180e9f76dc24",
+      "614451b71e5874611e2c7ae5"
+    ],
+    "pmcConversion": {
+      "pmcbot": 40,
+      "assault": 30
+    }
   },
   "ragfair": {
     "betterRagfairSellChance": true,

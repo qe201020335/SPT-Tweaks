@@ -211,7 +211,12 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.tweakInsurance(tables, configServer)
 
         this.lockBotEquipment(tables)
-        this.tweakPmcConversion(pmcConfig)
+
+        if (config.pmc.enable)
+        {
+            this.tweakPmc(pmcConfig)
+        }
+
         this.allowThingsInHolster(tables)
 
         if (config.noFallDamage)
@@ -468,22 +473,31 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
     }
 
-    private tweakPmcConversion(pmcConfig: IPmcConfig)
+    private tweakPmc(pmcConfig: IPmcConfig)
     {
-        this.logger.info(`[${this.mod}] Changing PMC conversion rate`)
-        const conv = config.pmcConversion
+        const pmc = config.pmc
+        pmcConfig.forceHealingItemsIntoSecure = pmc.forceHealingItemsIntoSecure
 
-        for (const botName in conv)
+        if (pmc.filterLootBlacklist)
         {
-            const rate = conv[botName]
+            pmcConfig.vestLoot.blacklist = this.filterBlacklist("PMC vest loot", pmcConfig.vestLoot.blacklist, pmc.blacklistException)
+            pmcConfig.pocketLoot.blacklist = this.filterBlacklist("PMC pocket loot", pmcConfig.pocketLoot.blacklist, pmc.blacklistException)
+            pmcConfig.backpackLoot.blacklist = this.filterBlacklist("PMC backpack loot", pmcConfig.backpackLoot.blacklist, pmc.blacklistException)
+        }
+
+        this.logger.info(`[${this.mod}] Changing PMC conversion rate`)
+        const pmcConv = pmc.pmcConversion
+
+        for (const botName in pmcConv)
+        {
+            const rate = pmcConv[botName]
             if (isNaN(rate))
             {
                 this.logger.error(`[${this.mod}] PMC from ${botName} conversion rate is not a number: ${rate}`)
             }
             else
             {
-                pmcConfig.convertIntoPmcChance[botName].min = rate
-                pmcConfig.convertIntoPmcChance[botName].max = rate
+                pmcConfig.convertIntoPmcChance[botName] = {min: rate, max: rate}
                 this.logger.success(`[${this.mod}] PMC from ${botName} conversion rate: ${rate}%`)
             }
         }
@@ -624,24 +638,29 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         if (conf.filterBlacklist)
         {
-            this.logger.info(`[${this.mod}] Removing things from Fence blacklist. Some items will be kept due to otherwise buggy behavior`)
-            const bc: string[] = []
-            const exceptions = new Set(conf.blacklistException)
-            fence.blacklist.forEach((type) =>
-            {
-                if (exceptions.has(type))
-                {
-                    bc.push(type)
-                    this.logger.info(`[${this.mod}] kept in blacklist: ${type} <${this.names[type]}>`)
-                }
-                else
-                {
-                    this.logger.success(`[${this.mod}] removed from blacklist: ${type} <${this.names[type]}>`)
-                }
-            })
-            fence.blacklist = bc
+            fence.blacklist = this.filterBlacklist("Fence", fence.blacklist, conf.blacklistException)
         }
 
+    }
+
+    private filterBlacklist(context: string, blacklist: string[], exceptions: string[] = []): string[]
+    {
+        this.logger.info(`[${this.mod}] Removing things from ${context} blacklist. Some items may be kept due to otherwise buggy behavior`)
+        const filtered: string[] = []
+        const exceptionsSet = new Set(exceptions)
+        blacklist.forEach((type) =>
+        {
+            if (exceptionsSet.has(type))
+            {
+                filtered.push(type)
+                this.logger.info(`[${this.mod}] kept in blacklist: ${type} <${this.names[type]}>`)
+            }
+            else
+            {
+                this.logger.success(`[${this.mod}] removed from blacklist: ${type} <${this.names[type]}>`)
+            }
+        })
+        return filtered
     }
 
     private scaleMinMax(input: MinMax, multi: number, round: boolean): MinMax
@@ -686,6 +705,16 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 }
             }
         }
+    }
+
+    private invertWeight(weights: Record<string, number>)
+    {
+        const highest = Math.max(...Object.values(weights));
+        for (const key in weights)
+        {
+            highest[key] = Math.round((1 / highest[key]) * highest);
+        }
+        // this.reduceWeightValues(this.backpackLootPool);
     }
 
 }
