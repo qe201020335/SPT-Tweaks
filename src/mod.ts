@@ -100,7 +100,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         self: LocationGenerator,
         dynamicLootDist: ILooseLoot,
         staticAmmoDist: Record<string, IStaticAmmoDetails[]>,
-        locationName: string,
+        locationName: string
     ): SpawnpointTemplate[]
     {
         // some prep work for the protected fields
@@ -130,7 +130,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             if (!spawnPoint.template)
             {
                 this.logger.warning(
-                    localisationService.getText("location-missing_dynamic_template", spawnPoint.locationId),
+                    localisationService.getText("location-missing_dynamic_template", spawnPoint.locationId)
                 );
 
                 continue;
@@ -139,7 +139,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             if (!spawnPoint.template.Items || spawnPoint.template.Items.length === 0)
             {
                 this.logger.error(
-                    localisationService.getText("location-spawnpoint_missing_items", spawnPoint.template.Id),
+                    localisationService.getText("location-spawnpoint_missing_items", spawnPoint.template.Id)
                 );
 
                 continue;
@@ -149,7 +149,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             {
                 const shouldNotKeep =
                     !seasonalEventActive && seasonalItemTplBlacklist.includes(
-                        spawnPoint.template.Items.find((x) => x._id === itemDist.composedKey.key)._tpl,
+                        spawnPoint.template.Items.find((x) => x._id === itemDist.composedKey.key)._tpl
                     )
                 return !shouldNotKeep
             })
@@ -452,12 +452,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 if (itemId in tables.templates.items)
                 {
                     const bot = bots[botName]
-                    const equipment: Record<string, number> = bot.inventory.equipment[equipLocation]
-                    for (const equipmentKey in equipment)
-                    {
-                        equipment[equipmentKey] = 0
-                    }
-                    equipment[itemId] = 100
+                    const newEquip: Record<string, number> = {}
+                    newEquip[itemId] = 1
+                    bot.inventory.equipment[equipLocation] = newEquip
                     bot.chances.equipment[equipLocation] = 100
                     this.logger.success(`[${this.mod}] ${botName}'s ${equipLocation} locked as <${this.names[itemId]}>`)
                 }
