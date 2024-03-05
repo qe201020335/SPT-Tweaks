@@ -1,9 +1,9 @@
 {
     "name": "SkyTweaks",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "main": "src/mod.js",
     "license": "MIT",
-    "author": "SkyQe",
+    "author": "qe201020335",
     "akiVersion": "~3.8",
 	"loadBefore": [],
 	"loadAfter": [],
