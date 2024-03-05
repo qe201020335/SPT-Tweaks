@@ -19,3 +19,7 @@
 /package-lock.json
 /tsconfig.json
 /types
+/config*
+/tmp
+*.js
+*.js.map
