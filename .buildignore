@@ -19,3 +19,8 @@
 /package-lock.json
 /tsconfig.json
 /types
+/config
+/config.bak
+/tmp
+*.js
+*.js.map
