@@ -473,8 +473,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         for (const [botName, equipLocks] of botsEquip)
         {
-            for (const [equipLocation, itemId] of equipLocks)
+            for (const equipLocation in equipLocks)
             {
+                const itemId = equipLocks[equipLocation]
                 this.logger.debug(`[${this.mod}] ${botName}:${equipLocation}:${itemId}`)
                 if (itemId in tables.templates.items)
                 {
