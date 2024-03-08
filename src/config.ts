@@ -83,6 +83,7 @@ export class TweakConfig
     verboseLogging: boolean = false;
     httpIP: string = "127.0.0.1";
     noFallDamage: boolean = false;
+    enableGiveCommand: boolean = false;
     priscilu: PrisciluConfig = new PrisciluConfig();
     bossSpawn: BossSpawnConfig = new BossSpawnConfig();
     botEquipments: BotEquipmentsConfig = new BotEquipmentsConfig();

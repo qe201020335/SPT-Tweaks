@@ -31,19 +31,21 @@ import {IHttpConfig} from "@spt-aki/models/spt/config/IHttpConfig";
 import {TweakConfig, Serializer} from "./config";
 import path from "path";
 import fs from "node:fs";
+import {ICoreConfig} from "@spt-aki/models/spt/config/ICoreConfig";
 
 const prisciluId = "Priscilu";
 
 class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 {
-    mod: string
-    logger: ILogger
-    names: Map<string, string>
-    jsonUtil: JsonUtil
-    mathUtil: MathUtil
-    config: TweakConfig = new TweakConfig()
+    private readonly mod: string
+    private readonly names: Map<string, string>
+    private readonly config: TweakConfig = new TweakConfig()
 
     private container: DependencyContainer
+    private logger: ILogger
+    private jsonUtil: JsonUtil
+    private mathUtil: MathUtil
+    private configServer: ConfigServer
 
     constructor()
     {
@@ -76,6 +78,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.container = container
         this.jsonUtil = container.resolve<JsonUtil>("JsonUtil")
         this.mathUtil = container.resolve<MathUtil>("MathUtil")
+        this.configServer = container.resolve<ConfigServer>("ConfigServer")
 
         if (this.config.ragfair.betterRagfairSellChance)
         {
@@ -113,6 +116,17 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             })
             this.logger.success(`[${this.mod}] LocationGenerator functions hooked.`)
         }
+
+        if (this.config.enableGiveCommand)
+        {
+            const coreConfig = this.configServer.getConfig<ICoreConfig>(ConfigTypes.CORE)
+            coreConfig.features.chatbotFeatures.commandoEnabled = true
+            coreConfig.features.chatbotFeatures.commandoFeatures.giveCommandEnabled = true
+            this.logger.success(`[${this.mod}] Commando give command enabled`);
+        }
+
+        const httpConfig = this.configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
+        httpConfig.ip = this.config.httpIP
         
         this.logger.info(`[${this.mod}] preAki Loaded`);
     }
