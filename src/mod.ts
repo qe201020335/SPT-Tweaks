@@ -61,7 +61,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (fs.existsSync(configPath))
         {
             fs.copyFileSync(configPath, configPath+".bak")
+            console.log(`[${this.mod}] config file backup finish`)
             Serializer.populateFromJsonString(this.config, fs.readFileSync(configPath).toString())
+            console.log(`[${this.mod}] config loaded`)
         }
         else
         {
@@ -626,15 +628,19 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         const sizeMulti = conf.assortSizeMulti
         this.logger.info(`[${this.mod}] multiplying fence listing by ${sizeMulti}`)
         fence.weaponPresetMinMax = this.scaleMinMax(fence.weaponPresetMinMax, sizeMulti, true)
-        this.logger.success(`[${this.mod}] guns: [${fence.weaponPresetMinMax.min}, ${fence.weaponPresetMinMax.max}]`)
+        this.logger.debug(`[${this.mod}] guns: [${fence.weaponPresetMinMax.min}, ${fence.weaponPresetMinMax.max}]`)
         fence.equipmentPresetMinMax = this.scaleMinMax(fence.equipmentPresetMinMax, sizeMulti, true)
-        this.logger.success(`[${this.mod}] equips: [${fence.equipmentPresetMinMax.min}, ${fence.equipmentPresetMinMax.max}]`)
+        this.logger.debug(`[${this.mod}] equips: [${fence.equipmentPresetMinMax.min}, ${fence.equipmentPresetMinMax.max}]`)
         let total = 0;
         for (const type in fence.itemTypeLimits)
         {
             fence.itemTypeLimits[type] = Math.round(Math.max(1, fence.itemTypeLimits[type]) * sizeMulti)
             total += fence.itemTypeLimits[type]
-            this.logger.success(`[${this.mod}] ${this.names[type]}: ${fence.itemTypeLimits[type]}`)
+
+            if (this.config.verboseLogging)
+            {
+                this.logger.debug(`[${this.mod}] ${this.names[type]}: ${fence.itemTypeLimits[type]}`)
+            }
         }
         total += fence.weaponPresetMinMax.max
         total += fence.equipmentPresetMinMax.max
@@ -658,7 +664,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         for (const type in fence.itemCategoryRoublePriceLimit)
         {
             fence.itemCategoryRoublePriceLimit[type] = Math.round(fence.itemCategoryRoublePriceLimit[type] * conf.priceLimitMulti)
-            this.logger.success(`[${this.mod}] price limit ${fence.itemCategoryRoublePriceLimit[type]} for ${this.names[type]}`)
+            if (this.config.verboseLogging)
+            {
+                this.logger.debug(`[${this.mod}] price limit ${fence.itemCategoryRoublePriceLimit[type]} for ${this.names[type]}`)
+            }
         }
 
         if (conf.alwaysFullPreset)
@@ -682,18 +691,27 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.logger.info(`[${this.mod}] Removing things from ${context} blacklist. Some items may be kept due to otherwise buggy behavior`)
         const filtered: string[] = []
         const exceptionsSet = new Set(exceptions)
+        let numFiltered = 0
         blacklist.forEach((type) =>
         {
             if (exceptionsSet.has(type))
             {
                 filtered.push(type)
-                this.logger.info(`[${this.mod}] kept in blacklist: ${type} <${this.names[type]}>`)
+                if (this.config.verboseLogging)
+                {
+                    this.logger.info(`[${this.mod}] kept in blacklist: ${type} <${this.names[type]}>`)
+                }
             }
             else
             {
-                this.logger.success(`[${this.mod}] removed from blacklist: ${type} <${this.names[type]}>`)
+                numFiltered++
+                if (this.config.verboseLogging)
+                {
+                    this.logger.success(`[${this.mod}] removed from blacklist: ${type} <${this.names[type]}>`)
+                }
             }
         })
+        this.logger.success(`[${this.mod}] removed ${numFiltered} items from blacklist`)
         return filtered
     }
 
@@ -721,7 +739,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                         if (exit.Chance !== 100)
                         {
                             exit.Chance = 100
-                            this.logger.success(`[${this.mod}] ${exit.Name} in ${locationName} is always available`)
+                            if (this.config.verboseLogging)
+                            {
+                                this.logger.debug(`[${this.mod}] ${exit.Name} in ${locationName} is always available`)
+                            }
                         }
                     })
                 }
