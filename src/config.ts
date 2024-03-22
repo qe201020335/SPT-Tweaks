@@ -128,6 +128,7 @@ export class BotEquipmentsConfig
             ["Holster", "5b3b713c5acfc4330140bd8d"]
         ])]
     ]);
+    removeInventoryLimits: boolean = true;
 }
 
 export class PmcConfig

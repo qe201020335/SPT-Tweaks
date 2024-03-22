@@ -28,10 +28,11 @@ import {LocalisationService} from "@spt-aki/services/LocalisationService";
 import {MathUtil} from "@spt-aki/utils/MathUtil";
 import {ILocationBase} from "@spt-aki/models/eft/common/ILocationBase";
 import {IHttpConfig} from "@spt-aki/models/spt/config/IHttpConfig";
-import {TweakConfig, Serializer} from "./config";
+import {Serializer, TweakConfig} from "./config";
 import path from "path";
 import fs from "node:fs";
 import {ICoreConfig} from "@spt-aki/models/spt/config/ICoreConfig";
+import {IBotConfig} from "@spt-aki/models/spt/config/IBotConfig";
 
 const prisciluId = "Priscilu";
 
@@ -237,7 +238,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         const ragfairConfig = configServer.getConfig<IRagfairConfig>(ConfigTypes.RAGFAIR)
         const locationConfig = configServer.getConfig<ILocationConfig>(ConfigTypes.LOCATION)
         const traderConfig = configServer.getConfig<ITraderConfig>(ConfigTypes.TRADER)
-
+        const botConfig = configServer.getConfig<IBotConfig>(ConfigTypes.BOT)
         const httpConfig = configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
 
         httpConfig.ip = this.config.httpIP
@@ -250,6 +251,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (this.config.botEquipments.enable)
         {
             this.lockBotEquipment(tables)
+            this.tweakBot(botConfig)
         }
 
         if (this.config.pmc.enable)
@@ -514,6 +516,19 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             // TODO: lock equipment mods
         }
 
+    }
+
+    private tweakBot(botConfig: IBotConfig)
+    {
+        if (this.config.botEquipments.removeInventoryLimits)
+        {
+            this.logger.info(`[${this.mod}] Removing bot inventory item limits`)
+            for (const bot in botConfig.itemSpawnLimits)
+            {
+                const moneyLimit = botConfig.itemSpawnLimits[bot]["543be5dd4bdc2deb348b4569"]
+                botConfig.itemSpawnLimits[bot] = moneyLimit ? {"543be5dd4bdc2deb348b4569": moneyLimit} : {}
+            }
+        }
     }
 
     private tweakPmc(pmcConfig: IPmcConfig)
