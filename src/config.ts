@@ -92,6 +92,7 @@ export class TweakConfig
     loot: LootConfig = new LootConfig();
     trader: TraderConfig = new TraderConfig();
     raid: RaidConfig = new RaidConfig();
+    quest: QuestConfig = new QuestConfig();
 }
 
 export class PrisciluConfig
@@ -206,4 +207,10 @@ export class RaidConfig
     enable: boolean = false;
     extraTime: number = 60;
     chanceExtractsAlwaysAvailable: boolean = true
+}
+
+export class QuestConfig
+{
+    enable: boolean = false;
+    removeQuestWaitTime: boolean = true
 }

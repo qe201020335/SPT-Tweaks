@@ -33,6 +33,7 @@ import path from "path";
 import fs from "node:fs";
 import {ICoreConfig} from "@spt-aki/models/spt/config/ICoreConfig";
 import {IBotConfig} from "@spt-aki/models/spt/config/IBotConfig";
+import {IQuest} from "@spt-aki/models/eft/common/tables/IQuest";
 
 const prisciluId = "Priscilu";
 
@@ -299,6 +300,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (this.config.raid.enable)
         {
             this.tweakRaids(tables.locations)
+        }
+
+        if (this.config.quest.enable)
+        {
+            this.tweakQuests(tables.templates.quests)
         }
 
         // this.logger.info(`[${this.mod}] Misc`)
@@ -791,6 +797,36 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         // this.reduceWeightValues(this.backpackLootPool);
     }
 
+    private tweakQuests(quests: Record<string, IQuest>)
+    {
+        this.logger.info(`[${this.mod}] Tweaking quests`)
+        if (this.config.quest.removeQuestWaitTime)
+        {
+            for (const questID in quests)
+            {
+                const quest = quests[questID]
+                quest.conditions.AvailableForStart.forEach(condition =>
+                {
+                    if (condition.conditionType === "Quest" && condition.availableAfter)
+                    {
+                        const waitHrs = condition.availableAfter / 3600
+                        const time = condition.dispersion ? `${waitHrs}-${waitHrs + condition.dispersion / 3600}` : `${waitHrs}`
+                        // const prevName = condition.target ? quests[condition.target]?.QuestName ?? "null" : "null"
+                        const prevQuests = Array.isArray(condition.target) ? condition.target : [condition.target]
+
+                        const prevName = prevQuests.filter(value => value).map((value) => quests[value]?.QuestName ?? "null").join(" ")
+
+                        this.logger.success(`[${this.mod}] Quest <${quest.QuestName}> no need to wait for <${time}> hrs after <${prevName}>`)
+                        condition.availableAfter = 0
+                        if (condition.dispersion)
+                        {
+                            condition.dispersion = 0
+                        }
+                    }
+                })
+            }
+        }
+    }
 }
 
 module.exports = { mod: new SkyTweaks() }
