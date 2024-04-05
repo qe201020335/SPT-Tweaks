@@ -563,10 +563,22 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         if (this.config.botEquipments.removeInventoryLimits)
         {
             this.logger.info(`[${this.mod}] Removing bot inventory item limits`)
+            const limitToKeep = new Set<string>(this.config.botEquipments.inventoryLimitToKeep)
             for (const bot in botConfig.itemSpawnLimits)
             {
-                const moneyLimit = botConfig.itemSpawnLimits[bot]["543be5dd4bdc2deb348b4569"]
-                botConfig.itemSpawnLimits[bot] = moneyLimit ? {"543be5dd4bdc2deb348b4569": moneyLimit} : {}
+                const newLimit = {}
+                for (const itemClass in botConfig.itemSpawnLimits[bot])
+                {
+                    if (limitToKeep.has(itemClass))
+                    {
+                        newLimit[itemClass] = botConfig.itemSpawnLimits[bot][itemClass]
+                    }
+                    else
+                    {
+                        this.logger.success(`[${this.mod}] Removed <${this.names[itemClass]}> limit <${botConfig.itemSpawnLimits[bot][itemClass]}> from <${bot}>`)
+                    }
+                }
+                botConfig.itemSpawnLimits[bot] = newLimit
             }
         }
     }

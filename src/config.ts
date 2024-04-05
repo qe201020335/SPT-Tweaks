@@ -130,6 +130,10 @@ export class BotEquipmentsConfig
         ])]
     ]);
     removeInventoryLimits: boolean = true;
+    inventoryLimitToKeep: string[] = [
+        "543be5dd4bdc2deb348b4569", // money
+        "543be5cb4bdc2deb348b4568"  // ammo box
+    ]
 }
 
 export class PmcConfig
