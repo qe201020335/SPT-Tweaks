@@ -355,15 +355,42 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             }
         }
 
+        const multiplyMed = (tpl: string, multiplier: number) =>
+        {
+            const itemProps = dbItems[tpl]._props
+            itemProps.MaxHpResource *= multiplier;
+            itemProps.hpResourceRate *= multiplier;
+            if (itemProps.effects_damage)
+            {
+                for (const effect in itemProps.effects_damage)
+                {
+                    if (itemProps.effects_damage[effect].cost)
+                    {
+                        itemProps.effects_damage[effect].cost *= multiplier;
+                    }
+                    // if (itemProps.effects_damage[effect].healthPenaltyMin)
+                    // {
+                    //     itemProps.effects_damage[effect].healthPenaltyMin *= multiplier;
+                    // }
+                    // if (itemProps.effects_damage[effect].healthPenaltyMax)
+                    // {
+                    //     itemProps.effects_damage[effect].healthPenaltyMax *= multiplier;
+                    // }
+                }
+            }
+        }
+
         //grizzly
-        dbItems["590c657e86f77412b013051d"]._props.MaxHpResource = 36000;
-        dbItems["590c657e86f77412b013051d"]._props.hpResourceRate = 3500;
+        multiplyMed("590c657e86f77412b013051d", 20)
+        // dbItems["590c657e86f77412b013051d"]._props.MaxHpResource = 36000;
+        // dbItems["590c657e86f77412b013051d"]._props.hpResourceRate = 3500;
         // dbItems["590c657e86f77412b013051d"]._props.Width = 1
         // dbItems["590c657e86f77412b013051d"]._props.Height = 1
 
         //afak
-        dbItems["60098ad7c2240c0fe85c570a"]._props.MaxHpResource = 4000;
-        dbItems["60098ad7c2240c0fe85c570a"]._props.hpResourceRate = 600;
+        multiplyMed("60098ad7c2240c0fe85c570a", 10)
+        // dbItems["60098ad7c2240c0fe85c570a"]._props.MaxHpResource = 4000;
+        // dbItems["60098ad7c2240c0fe85c570a"]._props.hpResourceRate = 600;
 
         // eod stash
         //"5811ce772459770e9e5f9532:Grids:0:_props:cellsV:148",
