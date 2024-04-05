@@ -355,10 +355,17 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             }
         }
 
+        //grizzly
         dbItems["590c657e86f77412b013051d"]._props.MaxHpResource = 36000;
-        dbItems["590c657e86f77412b013051d"]._props.hpResourceRate = 700;
+        dbItems["590c657e86f77412b013051d"]._props.hpResourceRate = 3500;
+        // dbItems["590c657e86f77412b013051d"]._props.Width = 1
+        // dbItems["590c657e86f77412b013051d"]._props.Height = 1
 
-        // stash
+        //afak
+        dbItems["60098ad7c2240c0fe85c570a"]._props.MaxHpResource = 4000;
+        dbItems["60098ad7c2240c0fe85c570a"]._props.hpResourceRate = 600;
+
+        // eod stash
         //"5811ce772459770e9e5f9532:Grids:0:_props:cellsV:148",
         dbItems["5811ce772459770e9e5f9532"]._props.Grids[0]._props.cellsV = 148
 
