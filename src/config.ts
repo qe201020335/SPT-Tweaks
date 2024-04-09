@@ -93,6 +93,7 @@ export class TweakConfig
     trader: TraderConfig = new TraderConfig();
     raid: RaidConfig = new RaidConfig();
     quest: QuestConfig = new QuestConfig();
+    item: ItemConfig = new ItemConfig();
 }
 
 export class PrisciluConfig
@@ -217,4 +218,12 @@ export class QuestConfig
 {
     enable: boolean = false;
     removeQuestWaitTime: boolean = true
+}
+
+export class ItemConfig
+{
+    enable: boolean = true;
+    infiniteKeyUsage: boolean = true;
+    noRepairDamage: boolean = true;
+    noInventoryLimits: boolean = true;
 }

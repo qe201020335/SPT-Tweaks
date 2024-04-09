@@ -34,6 +34,8 @@ import fs from "node:fs";
 import {ICoreConfig} from "@spt-aki/models/spt/config/ICoreConfig";
 import {IBotConfig} from "@spt-aki/models/spt/config/IBotConfig";
 import {IQuest} from "@spt-aki/models/eft/common/tables/IQuest";
+import {ItemHelper} from "@spt-aki/helpers/ItemHelper";
+import {BaseClasses} from "@spt-aki/models/enums/BaseClasses";
 
 const prisciluId = "Priscilu";
 
@@ -245,8 +247,17 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         httpConfig.ip = this.config.httpIP
 
         this.loadItemNames(tables)
-        this.tweakItems(tables)
-        this.noArmorRepairDamage(tables)
+
+        if (this.config.item.enable)
+        {
+            this.tweakItems(tables)
+            if (this.config.item.noInventoryLimits)
+            {
+                const globals = tables.globals.config
+                globals.RestrictionsInRaid = []
+                this.logger.success(`[${this.mod}] All inventory item limits removed`)
+            }
+        }
         this.tweakInsurance(tables, configServer)
 
         if (this.config.botEquipments.enable)
@@ -336,16 +347,19 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     private tweakItems(tables: IDatabaseTables)
     {
         this.logger.info(`[${this.mod}] Tweaking individual items`)
+        const config = this.config.item
+        const itemHelper = this.container.resolve<ItemHelper>("ItemHelper")
+
         const dbItems = tables.templates.items
         for (const id in dbItems)
         {
             const item = dbItems[id]
-            if ((item._parent == "5c99f98d86f7745c314214b3" || item._parent == "5c164d2286f774194c5e69fa") && item._props.MaximumNumberOfUsage !== undefined)
+            if (config.infiniteKeyUsage && (item._parent == BaseClasses.KEY_MECHANICAL || item._parent == BaseClasses.KEYCARD) && item._props.MaximumNumberOfUsage !== undefined)
             {
                 item._props.MaximumNumberOfUsage = 0
                 if (this.config.verboseLogging) this.logger.debug("[no usage limit] " + this.names[id])
             }
-            else if (item._props.MaxRepairDegradation !== undefined && item._props.MaxRepairKitDegradation !== undefined)
+            else if (config.noRepairDamage && item._props.MaxRepairDegradation !== undefined && item._props.MaxRepairKitDegradation !== undefined)
             {
                 item._props.MinRepairDegradation = 0;
                 item._props.MaxRepairDegradation = 0;
@@ -353,6 +367,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 item._props.MaxRepairKitDegradation = 0;
                 if (this.config.verboseLogging) this.logger.debug("[no repair damage] " + this.names[id])
             }
+        }
+
+        if (config.noRepairDamage)
+        {
+            this.noArmorRepairDamage(tables)
         }
 
         const multiplyMed = (tpl: string, multiplier: number) =>
