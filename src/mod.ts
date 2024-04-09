@@ -36,6 +36,10 @@ import {IBotConfig} from "@spt-aki/models/spt/config/IBotConfig";
 import {IQuest} from "@spt-aki/models/eft/common/tables/IQuest";
 import {ItemHelper} from "@spt-aki/helpers/ItemHelper";
 import {BaseClasses} from "@spt-aki/models/enums/BaseClasses";
+import {IRepairConfig} from "@spt-aki/models/spt/config/IRepairConfig";
+import {RepairHelper} from "@spt-aki/helpers/RepairHelper";
+import {ITemplateItem} from "@spt-aki/models/eft/common/tables/ITemplateItem";
+import {Item} from "@spt-aki/models/eft/common/tables/IItem";
 
 const prisciluId = "Priscilu";
 
@@ -49,8 +53,6 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
     private logger: ILogger
     private jsonUtil: JsonUtil
     private mathUtil: MathUtil
-    private configServer: ConfigServer
-
     constructor()
     {
         this.mod = "SkyTweaks"; // Set name of mod, so we can log it to console later
@@ -64,7 +66,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         const configPath = path.resolve(configDir, "config.json")
         if (fs.existsSync(configPath))
         {
-            fs.copyFileSync(configPath, configPath+".bak")
+            fs.copyFileSync(configPath, configPath+".bak.json")
             console.log(`[${this.mod}] config file backup finish`)
             Serializer.populateFromJsonString(this.config, fs.readFileSync(configPath).toString())
             console.log(`[${this.mod}] config loaded`)
@@ -84,7 +86,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         this.container = container
         this.jsonUtil = container.resolve<JsonUtil>("JsonUtil")
         this.mathUtil = container.resolve<MathUtil>("MathUtil")
-        this.configServer = container.resolve<ConfigServer>("ConfigServer")
+        const configServer = container.resolve<ConfigServer>("ConfigServer")
 
         if (this.config.ragfair.betterRagfairSellChance)
         {
@@ -123,15 +125,47 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             this.logger.success(`[${this.mod}] LocationGenerator functions hooked.`)
         }
 
+        if (this.config.repair.enable)
+        {
+            const repairConfig = configServer.getConfig<IRepairConfig>(ConfigTypes.REPAIR)
+            repairConfig.applyRandomizeDurabilityLoss = !this.config.repair.noRepairDamage
+            if (this.config.repair.resetDurability)
+            {
+                container.afterResolution("RepairHelper", (_t, result: RepairHelper) =>
+                {
+                    result.updateItemDurability = (
+                        itemToRepair: Item,
+                        itemToRepairDetails: ITemplateItem,
+                        isArmor: boolean,
+                        amountToRepair: number,
+                        useRepairKit: boolean,
+                        traderQualityMultipler: number,
+                        applyMaxDurabilityDegradation = true
+                    ): void =>
+                    {
+                        // make it brand new :D
+                        itemToRepair.upd.Repairable = { Durability: 100, MaxDurability: 100 };
+
+                        // Repair mask cracks
+                        if (itemToRepair.upd.FaceShield && itemToRepair.upd.FaceShield?.Hits > 0)
+                        {
+                            itemToRepair.upd.FaceShield.Hits = 0;
+                        }
+                    }
+                })
+                this.logger.success(`[${this.mod}] RepairHelper functions hooked.`)
+            }
+        }
+
         if (this.config.enableGiveCommand)
         {
-            const coreConfig = this.configServer.getConfig<ICoreConfig>(ConfigTypes.CORE)
+            const coreConfig = configServer.getConfig<ICoreConfig>(ConfigTypes.CORE)
             coreConfig.features.chatbotFeatures.commandoEnabled = true
             coreConfig.features.chatbotFeatures.commandoFeatures.giveCommandEnabled = true
             this.logger.success(`[${this.mod}] Commando give command enabled`);
         }
 
-        const httpConfig = this.configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
+        const httpConfig = configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
         httpConfig.ip = this.config.httpIP
         
         this.logger.info(`[${this.mod}] preAki Loaded`);
@@ -359,19 +393,6 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 item._props.MaximumNumberOfUsage = 0
                 if (this.config.verboseLogging) this.logger.debug("[no usage limit] " + this.names[id])
             }
-            else if (config.noRepairDamage && item._props.MaxRepairDegradation !== undefined && item._props.MaxRepairKitDegradation !== undefined)
-            {
-                item._props.MinRepairDegradation = 0;
-                item._props.MaxRepairDegradation = 0;
-                item._props.MinRepairKitDegradation = 0;
-                item._props.MaxRepairKitDegradation = 0;
-                if (this.config.verboseLogging) this.logger.debug("[no repair damage] " + this.names[id])
-            }
-        }
-
-        if (config.noRepairDamage)
-        {
-            this.noArmorRepairDamage(tables)
         }
 
         const multiplyMed = (tpl: string, multiplier: number) =>
@@ -426,19 +447,6 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         // T-7
         dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0] = dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0].map(num => num * 4)
         this.logger.debug(`[${this.mod}] T-7 range: ${JSON.stringify(dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0])}`)
-    }
-
-    private noArmorRepairDamage(tables: IDatabaseTables)
-    {
-        this.logger.info(`[${this.mod}] Removing armor repair damage`)
-        const armorMats = tables.globals.config.ArmorMaterials
-        for (const mat in armorMats)
-        {
-            armorMats[mat].MaxRepairDegradation = 0
-            armorMats[mat].MinRepairDegradation = 0
-            armorMats[mat].MaxRepairKitDegradation = 0
-            armorMats[mat].MinRepairKitDegradation = 0
-        }
     }
 
     private tweakInsurance(tables: IDatabaseTables, configServer: ConfigServer)

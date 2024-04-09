@@ -94,6 +94,7 @@ export class TweakConfig
     raid: RaidConfig = new RaidConfig();
     quest: QuestConfig = new QuestConfig();
     item: ItemConfig = new ItemConfig();
+    repair: RepairConfig = new RepairConfig();
 }
 
 export class PrisciluConfig
@@ -224,6 +225,12 @@ export class ItemConfig
 {
     enable: boolean = true;
     infiniteKeyUsage: boolean = true;
-    noRepairDamage: boolean = true;
     noInventoryLimits: boolean = true;
+}
+
+export class RepairConfig
+{
+    enable: boolean = false;
+    noRepairDamage: boolean = true;
+    resetDurability: boolean = false;
 }
