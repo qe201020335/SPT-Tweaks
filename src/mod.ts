@@ -143,8 +143,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                         applyMaxDurabilityDegradation = true
                     ): void =>
                     {
+                        const maxDura = itemToRepairDetails._props.MaxDurability ?? itemToRepair.upd?.Repairable?.MaxDurability ?? 100
+
                         // make it brand new :D
-                        itemToRepair.upd.Repairable = { Durability: 100, MaxDurability: 100 };
+                        itemToRepair.upd.Repairable = { Durability: maxDura, MaxDurability: maxDura };
 
                         // Repair mask cracks
                         if (itemToRepair.upd.FaceShield && itemToRepair.upd.FaceShield?.Hits > 0)
