@@ -284,6 +284,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         this.loadItemNames(tables)
 
+        if (this.config.repair.noRepairDamage)
+        {
+            this.removeRepairDamage(tables)
+        }
+
         if (this.config.item.enable)
         {
             this.tweakItems(tables)
@@ -378,6 +383,35 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             if (this.config.verboseLogging) this.logger.debug(`[${this.mod}] ${item._id}:${this.names[item._id]}`)
         }
         this.logger.info(`[${this.mod}] item names Loaded`)
+    }
+
+    private removeRepairDamage(tables: IDatabaseTables)
+    {
+        this.logger.info(`[${this.mod}] Removing repair damage`)
+        const dbItems = tables.templates.items
+        for (const id in dbItems)
+        {
+            const item = dbItems[id]
+            if (this.config.repair.noRepairDamage && item._props.MaxRepairDegradation !== undefined && item._props.MaxRepairKitDegradation !== undefined)
+            {
+                item._props.MinRepairDegradation = 0;
+                item._props.MaxRepairDegradation = 0;
+                item._props.MinRepairKitDegradation = 0;
+                item._props.MaxRepairKitDegradation = 0;
+                if (this.config.verboseLogging) this.logger.debug("[no repair damage] " + this.names[id])
+            }
+        }
+
+        this.logger.info(`[${this.mod}] Removing armor repair damage`)
+        const armorMats = tables.globals.config.ArmorMaterials
+        for (const mat in armorMats)
+        {
+            armorMats[mat].MaxRepairDegradation = 0
+            armorMats[mat].MinRepairDegradation = 0
+            armorMats[mat].MaxRepairKitDegradation = 0
+            armorMats[mat].MinRepairKitDegradation = 0
+        }
+
     }
 
     private tweakItems(tables: IDatabaseTables)
