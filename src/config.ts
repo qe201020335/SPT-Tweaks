@@ -84,6 +84,7 @@ export class TweakConfig
     network: NetworkConfig = new NetworkConfig();
     noFallDamage: boolean = false;
     enableGiveCommand: boolean = false;
+    enableTweaksCommand: boolean = true;
     priscilu: PrisciluConfig = new PrisciluConfig();
     bossSpawn: BossSpawnConfig = new BossSpawnConfig();
     botEquipments: BotEquipmentsConfig = new BotEquipmentsConfig();

@@ -40,10 +40,13 @@ import {IRepairConfig} from "@spt-aki/models/spt/config/IRepairConfig";
 import {RepairHelper} from "@spt-aki/helpers/RepairHelper";
 import {ITemplateItem} from "@spt-aki/models/eft/common/tables/ITemplateItem";
 import {Item} from "@spt-aki/models/eft/common/tables/IItem";
+import {IPostAkiLoadMod} from "@spt-aki/models/external/IPostAkiLoadMod";
+import {CommandoDialogueChatBot} from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
+import {TweaksCommand} from "./command";
 
 const prisciluId = "Priscilu";
 
-class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
+class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 {
     private readonly mod: string
     private readonly names: Map<string, string>
@@ -361,6 +364,18 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         // this.logger.info(`[${this.mod}] Misc`)
 
         this.logger.debug(`[${this.mod}] postDb Loaded`);
+    }
+
+    public postAkiLoad(container: DependencyContainer)
+    {
+        if (this.config.enableTweaksCommand)
+        {
+            container
+                .resolve<CommandoDialogueChatBot>("CommandoDialogueChatBot")
+                .registerCommandoCommand(new TweaksCommand(container))
+
+            this.logger.info(`[${this.mod}] TweaksCommand registered`)
+        }
     }
 
     private loadItemNames(tables: IDatabaseTables) 
