@@ -1,10 +1,10 @@
 {
     "name": "SkyTweaks",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "main": "src/mod.js",
     "license": "MIT",
     "author": "qe201020335",
-    "akiVersion": "~3.8",
+    "akiVersion": "~3.8.1",
 	"loadBefore": [],
 	"loadAfter": [],
 	"incompatibilities": [],
