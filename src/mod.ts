@@ -4,7 +4,7 @@ import {DependencyContainer} from "tsyringe";
 import {IPostDBLoadMod} from "@spt-aki/models/external/IPostDBLoadMod";
 import {IPreAkiLoadMod} from "@spt-aki/models/external/IPreAkiLoadMod";
 import {IDatabaseTables} from "@spt-aki/models/spt/server/IDatabaseTables";
-import {ILocationData, ILocations} from "@spt-aki/models/spt/server/ILocations";
+import {ILocations} from "@spt-aki/models/spt/server/ILocations";
 import {ILogger} from "@spt-aki/models/spt/utils/ILogger";
 import {DatabaseServer} from "@spt-aki/servers/DatabaseServer";
 
@@ -544,7 +544,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
             this.logger.info(`[${this.mod}] Boss spawn rate is UNIFIED!`)
             for (const i in locations) 
             {
-                const location: ILocationData = locations[i];
+                const location = locations[i];
                 if (i === "base") 
                 {
                     continue
@@ -570,7 +570,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 {
                     for (const i in locations)
                     {
-                        const location: ILocationData = locations[i];
+                        const location = locations[i];
                         if (i === "base")
                         {
                             continue
