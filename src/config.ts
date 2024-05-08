@@ -81,7 +81,7 @@ export class Serializer
 export class TweakConfig
 {
     verboseLogging: boolean = false;
-    httpIP: string = "127.0.0.1";
+    network: NetworkConfig = new NetworkConfig();
     noFallDamage: boolean = false;
     enableGiveCommand: boolean = false;
     priscilu: PrisciluConfig = new PrisciluConfig();
@@ -95,6 +95,12 @@ export class TweakConfig
     quest: QuestConfig = new QuestConfig();
     item: ItemConfig = new ItemConfig();
     repair: RepairConfig = new RepairConfig();
+}
+
+export class NetworkConfig
+{
+    listenIp: string = "127.0.0.1";
+    backendIp: string = "127.0.0.1"
 }
 
 export class PrisciluConfig
