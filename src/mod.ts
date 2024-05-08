@@ -169,7 +169,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
 
         const httpConfig = configServer.getConfig<IHttpConfig>(ConfigTypes.HTTP)
         httpConfig.ip = this.config.network.listenIp
-        httpConfig.backendIp = this.config.network.listenIp
+        httpConfig.backendIp = this.config.network.backendIp
         this.logger.info(`[${this.mod}] Using backend <${httpConfig.backendIp}> listened on <${httpConfig.ip}>`);
 
         this.logger.info(`[${this.mod}] preAki Loaded`);
