@@ -480,8 +480,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         dbItems["5c093db286f7740a1b2617e3"]._props.Grids[0]._props.cellsH = 10
 
         // T-7
-        dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0] = dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0].map(num => num * 4)
-        this.logger.debug(`[${this.mod}] T-7 range: ${JSON.stringify(dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0])}`)
+        // dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0] = dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0].map(num => num * 4)
+
+        // STM-9
+        dbItems["60339954d62c9b14ed777c06"]._props.weapFireType = ["single", "burst", "fullauto"]
     }
 
     private tweakInsurance(tables: IDatabaseTables, configServer: ConfigServer)
