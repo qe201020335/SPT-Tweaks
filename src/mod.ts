@@ -38,8 +38,7 @@ import {ITemplateItem} from "@spt/models/eft/common/tables/ITemplateItem";
 import {Item} from "@spt/models/eft/common/tables/IItem";
 import {IPostSptLoadMod} from "@spt/models/external/IPostSptLoadMod";
 import {CommandoDialogueChatBot} from "@spt/helpers/Dialogue/CommandoDialogueChatBot";
-import {TweaksCommand} from "./command";
-import {SptCommandoCommands} from "@spt/helpers/Dialogue/Commando/SptCommandoCommands";
+import {TweaksChatCommand} from "./Commands/TweaksChatCommand";
 
 const prisciluId = "Priscilu";
 
@@ -258,7 +257,7 @@ class SkyTweaks implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
         {
             container
                 .resolve<CommandoDialogueChatBot>("CommandoDialogueChatBot")
-                .registerChatCommand(new TweaksCommand(container))
+                .registerChatCommand(new TweaksChatCommand(container))
 
             this.logger.info(`[${this.mod}] TweaksCommand registered`)
         }
