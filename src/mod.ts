@@ -464,6 +464,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
                 }
             }
 
+            if (config.noOverheat && item._props.AllowOverheat !== undefined && item._props.AllowOverheat !== null)
+            {
+                item._props.AllowOverheat = false
+            }
         }
 
         const multiplyMed = (tpl: string, multiplier: number) =>
