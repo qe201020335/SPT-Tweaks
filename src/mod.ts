@@ -428,6 +428,27 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
                 item._props.MaximumNumberOfUsage = 0
                 if (this.config.verboseLogging) this.logger.debug("[no usage limit] " + this.names[id])
             }
+
+            if (config.allGunFullauto && (itemHelper.isOfBaseclass(item._id, BaseClasses.WEAPON)))
+            {
+                if (item._props.weapFireType && item._props.bFirerate)
+                {
+                    if (!item._props.weapFireType.includes("fullauto"))
+                    {
+                        item._props.weapFireType.push("fullauto")
+                        if (item._props.bFirerate <= item._props.SingleFireRate)
+                        {
+                            item._props.bFirerate = item._props.SingleFireRate
+                        }
+                        if (this.config.verboseLogging) this.logger.success(`[${this.mod}] Full auto: ${this.names[id]} ${item._props.bFirerate}rpm`)
+                    }
+                }
+                else
+                {
+                    this.logger.warning(`[${this.mod}] can't make full auto: ${this.names[id]}`)
+                }
+            }
+
         }
 
         const multiplyMed = (tpl: string, multiplier: number) =>
@@ -483,7 +504,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod
         // dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0] = dbItems["5c110624d174af029e69734c"]._props.CalibrationDistances[0].map(num => num * 4)
 
         // STM-9
-        dbItems["60339954d62c9b14ed777c06"]._props.weapFireType = ["single", "burst", "fullauto"]
+        // dbItems["60339954d62c9b14ed777c06"]._props.weapFireType = ["single", "burst", "fullauto"]
     }
 
     private tweakInsurance(tables: IDatabaseTables, configServer: ConfigServer)

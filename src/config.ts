@@ -232,6 +232,7 @@ export class ItemConfig
     enable: boolean = true;
     infiniteKeyUsage: boolean = true;
     noInventoryLimits: boolean = true;
+    allGunFullauto: boolean = false;
 }
 
 export class RepairConfig
