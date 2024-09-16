@@ -4,7 +4,7 @@
     "main": "src/mod.js",
     "license": "MIT",
     "author": "qe201020335",
-    "akiVersion": "~3.9.8",
+    "sptVersion": "~3.9.8",
 	"loadBefore": [],
 	"loadAfter": [],
 	"incompatibilities": [],
