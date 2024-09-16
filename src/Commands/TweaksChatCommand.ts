@@ -1,9 +1,9 @@
-import { IUserDialogInfo } from "@spt-aki/models/eft/profile/IAkiProfile";
-import { ISendMessageRequest } from "@spt-aki/models/eft/dialog/ISendMessageRequest";
+import { IUserDialogInfo } from "@spt/models/eft/profile/ISptProfile";
+import { ISendMessageRequest } from "@spt/models/eft/dialog/ISendMessageRequest";
 import { DependencyContainer } from "tsyringe";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { MailSendService } from "@spt-aki/services/MailSendService";
-import { IChatCommand } from "@spt-aki/helpers/Dialogue/Commando/IChatCommand";
+import { ILogger } from "@spt/models/spt/utils/ILogger";
+import { MailSendService } from "@spt/services/MailSendService";
+import { IChatCommand } from "@spt/helpers/Dialogue/Commando/IChatCommand";
 import { CommandTweakOption } from "./TweakOptions/CommandTweakOption";
 import { PMCConversionTweakOption } from "./TweakOptions/PMCConversionTweakOption";
 

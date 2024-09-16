@@ -1,6 +1,6 @@
-import { ConfigServer } from "@spt-aki/servers/ConfigServer";
-import { IPmcConfig } from "@spt-aki/models/spt/config/IPmcConfig";
-import { ConfigTypes } from "@spt-aki/models/enums/ConfigTypes";
+import { ConfigServer } from "@spt/servers/ConfigServer";
+import { IPmcConfig } from "@spt/models/spt/config/IPmcConfig";
+import { ConfigTypes } from "@spt/models/enums/ConfigTypes";
 import { CommandTweakOption } from "./CommandTweakOption";
 
 export class PMCConversionTweakOption extends CommandTweakOption

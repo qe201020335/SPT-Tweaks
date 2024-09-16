@@ -1,46 +1,41 @@
 import { DependencyContainer } from "tsyringe";
-
-// SPT types
-import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
-import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
-import { ILocations } from "@spt-aki/models/spt/server/ILocations";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-
-
-import { ConfigTypes } from "@spt-aki/models/enums/ConfigTypes";
-import { IPmcConfig } from "@spt-aki/models/spt/config/IPmcConfig";
-import { ConfigServer } from "@spt-aki/servers/ConfigServer";
-import { RagfairSellHelper } from "@spt-aki/helpers/RagfairSellHelper";
-import { IRagfairConfig } from "@spt-aki/models/spt/config/IRagfairConfig";
-import { ILocationConfig } from "@spt-aki/models/spt/config/ILocationConfig";
-import { IInsuranceConfig } from "@spt-aki/models/spt/config/IInsuranceConfig";
-
-import { FenceConfig, ITraderConfig } from "@spt-aki/models/spt/config/ITraderConfig";
-import { MinMax } from "@spt-aki/models/common/MinMax";
-import { ILooseLoot } from "@spt-aki/models/eft/common/ILooseLoot";
-import { JsonUtil } from "@spt-aki/utils/JsonUtil";
-import { MathUtil } from "@spt-aki/utils/MathUtil";
-import { ILocationBase } from "@spt-aki/models/eft/common/ILocationBase";
-import { IHttpConfig } from "@spt-aki/models/spt/config/IHttpConfig";
-import { Serializer, TweakConfig } from "./config";
 import path from "path";
 import fs from "node:fs";
-import { ICoreConfig } from "@spt-aki/models/spt/config/ICoreConfig";
-import { IBotConfig } from "@spt-aki/models/spt/config/IBotConfig";
-import { IQuest } from "@spt-aki/models/eft/common/tables/IQuest";
-import { ItemHelper } from "@spt-aki/helpers/ItemHelper";
-import { BaseClasses } from "@spt-aki/models/enums/BaseClasses";
-import { IRepairConfig } from "@spt-aki/models/spt/config/IRepairConfig";
-import { RepairHelper } from "@spt-aki/helpers/RepairHelper";
-import { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
-import { Item } from "@spt-aki/models/eft/common/tables/IItem";
-import { IPostAkiLoadMod } from "@spt-aki/models/external/IPostAkiLoadMod";
-import { CommandoDialogueChatBot } from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
+
+// SPT types
+import { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
+import { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod";
+import { IDatabaseTables } from "@spt/models/spt/server/IDatabaseTables";
+import { ILocations } from "@spt/models/spt/server/ILocations";
+import { ILogger } from "@spt/models/spt/utils/ILogger";
+import { DatabaseServer } from "@spt/servers/DatabaseServer";
+import { ConfigTypes } from "@spt/models/enums/ConfigTypes";
+import { IPmcConfig } from "@spt/models/spt/config/IPmcConfig";
+import { ConfigServer } from "@spt/servers/ConfigServer";
+import { RagfairSellHelper } from "@spt/helpers/RagfairSellHelper";
+import { IRagfairConfig } from "@spt/models/spt/config/IRagfairConfig";
+import { ILocationConfig } from "@spt/models/spt/config/ILocationConfig";
+import { IInsuranceConfig } from "@spt/models/spt/config/IInsuranceConfig";
+import { FenceConfig, ITraderConfig } from "@spt/models/spt/config/ITraderConfig";
+import { ILooseLoot } from "@spt/models/eft/common/ILooseLoot";
+import { JsonUtil } from "@spt/utils/JsonUtil";
+import { MathUtil } from "@spt/utils/MathUtil";
+import { ILocationBase } from "@spt/models/eft/common/ILocationBase";
+import { IHttpConfig } from "@spt/models/spt/config/IHttpConfig";
+import { Serializer, TweakConfig } from "./config";
+import { ICoreConfig } from "@spt/models/spt/config/ICoreConfig";
+import { IBotConfig } from "@spt/models/spt/config/IBotConfig";
+import { IQuest } from "@spt/models/eft/common/tables/IQuest";
+import { ItemHelper } from "@spt/helpers/ItemHelper";
+import { BaseClasses } from "@spt/models/enums/BaseClasses";
+import { IRepairConfig } from "@spt/models/spt/config/IRepairConfig";
+import { RepairHelper } from "@spt/helpers/RepairHelper";
+import { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
+import { Item } from "@spt/models/eft/common/tables/IItem";
+import { IPostSptLoadMod } from "@spt/models/external/IPostSptLoadMod";
+import { CommandoDialogueChatBot } from "@spt/helpers/Dialogue/CommandoDialogueChatBot";
 import { TweaksChatCommand } from "./Commands/TweaksChatCommand";
-import { ILootBase } from "@spt-aki/models/eft/common/tables/ILootBase";
-import { IExp } from "@spt-aki/models/eft/common/IGlobals";
+import { ILocation } from "@spt/models/eft/common/ILocation";
 
 const prisciluId = "Priscilu";
 
@@ -49,7 +44,7 @@ interface ICommonRelativeProbability
     relativeProbability: number;
 }
 
-class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
+class SkyTweaks implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
 {
     private readonly mod: string
     private readonly names: Map<string, string>
@@ -86,7 +81,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         fs.writeFileSync(configPath, Serializer.serializeToJsonString(this.config));
     }
 
-    public preAkiLoad(container: DependencyContainer): void
+    public preSptLoad(container: DependencyContainer): void
     {
         this.logger = container.resolve<ILogger>("WinstonLogger");
         this.logger.info(`[${this.mod}] preAki Loading... `)
@@ -248,7 +243,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 
         if (this.config.loot.enable)
         {
-            this.lootMultiplier(locationConfig, tables.locations, tables.loot)
+            this.lootMultiplier(locationConfig, tables.locations)
         }
 
         if (this.config.trader.enable)
@@ -276,7 +271,19 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.debug(`[${this.mod}] postDb Loaded`);
     }
 
-    private loadItemNames(tables: IDatabaseTables)
+    public postSptLoad(container: DependencyContainer)
+    {
+        if (this.config.enableTweaksCommand)
+        {
+            container
+                .resolve<CommandoDialogueChatBot>("CommandoDialogueChatBot")
+                .registerChatCommand(new TweaksChatCommand(container))
+
+            this.logger.info(`[${this.mod}] TweaksCommand registered`)
+        }
+    }
+
+    private loadItemNames(tables: IDatabaseTables) 
     {
         this.names.clear()
         const locals = tables.locales.global["en"]
@@ -431,11 +438,17 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         const insuranceConfig = configServer.getConfig<IInsuranceConfig>(ConfigTypes.INSURANCE)
         const traders = tables.traders
 
-        insuranceConfig.insuranceMultiplier["54cb50c76803fa8b248b4571"] = 0.01;
-        insuranceConfig.insuranceMultiplier["54cb57776803fa99248b456e"] = 0.01;
         insuranceConfig.returnChancePercent["54cb50c76803fa8b248b4571"] = 100;
         insuranceConfig.returnChancePercent["54cb57776803fa99248b456e"] = 100;
         globals.Insurance.MaxStorageTimeInHour = 720;
+
+        traders["54cb50c76803fa8b248b4571"].base.loyaltyLevels.forEach((loyaltyLevel) => {
+            loyaltyLevel.insurance_price_coef = 0.01;
+        })
+        traders["54cb57776803fa99248b456e"].base.loyaltyLevels.forEach((loyaltyLevel) => {
+            loyaltyLevel.insurance_price_coef = 0.01;
+        })
+
         traders["54cb50c76803fa8b248b4571"].base.insurance.min_return_hour = 0;
         traders["54cb50c76803fa8b248b4571"].base.insurance.max_return_hour = 1;
         traders["54cb57776803fa99248b456e"].base.insurance.min_return_hour = 0;
@@ -636,7 +649,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.success(`[${this.mod}] Ragfair sell chance: ${ragfairConfig.sell.chance.base}% [${ragfairConfig.sell.chance.minSellChancePercent}%, ${ragfairConfig.sell.chance.maxSellChancePercent}%] `)
     }
 
-    private lootMultiplier(locationConfig: ILocationConfig, locations: ILocations, lootTable: ILootBase)
+    private lootMultiplier(locationConfig: ILocationConfig, locations: ILocations)
     {
         this.logger.info(`[${this.mod}] Multiplying loot`)
         if (this.config.loot.useGlobalMultiplier)
@@ -687,39 +700,52 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 
         if (this.config.loot.invertLootDistribution)
         {
-            this.logger.info(`[${this.mod}] Inverting loosed loot distribution`)
+            this.logger.info(`[${this.mod}] Inverting loot distribution`)
             for (const locationName in locations)
             {
-                this.logger.debug(`[${this.mod}] Attempting ${locationName}`)
                 if (locationName != "base" && locationName != "hideout" && locations[locationName]["looseLoot"])
                 {
-                    const looseLoot: ILooseLoot = locations[locationName]["looseLoot"]
-                    const spawnPoints = looseLoot.spawnpoints;
+                    this.logger.debug(`[${this.mod}] Attempting ${locationName}`)
+                    const location = locations[locationName] as ILocation;
+                    const looseLoot = location.looseLoot
+                    const staticLoot = location.staticLoot
+                    const staticAmmo = location.staticAmmo
 
-                    for (const spawnPoint of spawnPoints)
+                    if (looseLoot)
                     {
-                        const distribution = spawnPoint.itemDistribution;
-                        this.invertWeightCommon(distribution);
-                        // this.logger.success(`[${this.mod}] inverted weights: ${JSON.stringify(distribution)}`)
+
+                        const spawnPoints = looseLoot.spawnpoints;
+
+                        for (const spawnPoint of spawnPoints)
+                        {
+                            const distribution = spawnPoint.itemDistribution;
+                            this.invertWeightCommon(distribution);
+                            // this.logger.success(`[${this.mod}] inverted weights: ${JSON.stringify(distribution)}`)
+                        }
                     }
+
+                    if (staticLoot)
+                    {
+                        // invert static loot table
+                        for (const key in staticLoot)
+                        {
+                            this.invertWeightCommon(staticLoot[key].itemDistribution);
+                            this.invertWeightCommon(staticLoot[key].itemcountDistribution);
+                            this.logger.success(`[${this.mod}] ${this.names[key]} loot pool probability distribution inverted`)
+                        }
+                    }
+
+                    if (staticAmmo)
+                    {
+                        for (const key in staticAmmo)
+                        {
+                            this.invertWeightCommon(staticAmmo[key]);
+                            this.logger.success(`[${this.mod}] ${key} static ammo pool probability distribution inverted`)
+                        }
+                    }
+
+                    this.logger.success(`[${this.mod}] ${locationName} loosed loot pool probability distribution inverted`)
                 }
-                this.logger.success(`[${this.mod}] ${locationName} loosed loot pool probability distribution inverted`)
-            }
-
-            // invert static loot table
-            const staticLoot = lootTable.staticLoot
-            for (const key in staticLoot)
-            {
-                this.invertWeightCommon(staticLoot[key].itemDistribution);
-                this.invertWeightCommon(staticLoot[key].itemcountDistribution);
-                this.logger.success(`[${this.mod}] ${this.names[key]} loot pool probability distribution inverted`)
-            }
-
-            const staticAmmo = lootTable.staticAmmo
-            for (const key in staticAmmo)
-            {
-                this.invertWeightCommon(staticAmmo[key]);
-                this.logger.success(`[${this.mod}] ${key} static ammo pool probability distribution inverted`)
             }
         }
     }
@@ -788,7 +814,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.success(`[${this.mod}] price multi: ${fence.itemPriceMult}, ${fence.presetPriceMult}`)
 
         fence.regenerateAssortsOnRefresh = conf.regenerateOnRefresh
-        fence.chancePlateExistsInArmorPercent = conf.armorWithPlatesChance
+        for (const type in fence.chancePlateExistsInArmorPercent)
+        {
+            fence.chancePlateExistsInArmorPercent[type] = conf.armorWithPlatesChance
+        }
 
         fence.armorMaxDurabilityPercentMinMax.max = { min: conf.maxDurability, max: conf.maxDurability }
         fence.armorMaxDurabilityPercentMinMax.current = { min: conf.minCurrDurability, max: conf.maxDurability }
