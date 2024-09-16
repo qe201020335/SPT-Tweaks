@@ -415,6 +415,8 @@ class SkyTweaks implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
         // eod stash
         //"5811ce772459770e9e5f9532:Grids:0:_props:cellsV:148",
         dbItems["5811ce772459770e9e5f9532"]._props.Grids[0]._props.cellsV = 148
+        // unheard stash
+        dbItems["6602bcf19cc643f44a04274b"]._props.Grids[0]._props.cellsV = 168
 
         // sicc
         dbItems["5d235bb686f77443f4331278"]._props.Grids[0]._props.cellsV = 8
