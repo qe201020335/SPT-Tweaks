@@ -4,7 +4,7 @@
     "main": "src/mod.js",
     "license": "MIT",
     "author": "qe201020335",
-    "akiVersion": "~3.8.1",
+    "sptVersion": "~3.9.8",
 	"loadBefore": [],
 	"loadAfter": [],
 	"incompatibilities": [],
@@ -23,7 +23,6 @@
         "eslint": "8.57",
         "fs-extra": "11.2",
         "ignore": "^5.2",
-        "os": "^0.1",
         "tsyringe": "4.8.0",
         "typescript": "5.4",
         "winston": "3.12"
