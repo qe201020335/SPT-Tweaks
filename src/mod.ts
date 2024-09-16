@@ -419,11 +419,17 @@ class SkyTweaks implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
         const insuranceConfig = configServer.getConfig<IInsuranceConfig>(ConfigTypes.INSURANCE)
         const traders = tables.traders
 
-        // insuranceConfig.insuranceMultiplier["54cb50c76803fa8b248b4571"] = 0.01;
-        // insuranceConfig.insuranceMultiplier["54cb57776803fa99248b456e"] = 0.01;
         insuranceConfig.returnChancePercent["54cb50c76803fa8b248b4571"] = 100;
         insuranceConfig.returnChancePercent["54cb57776803fa99248b456e"] = 100;
         globals.Insurance.MaxStorageTimeInHour = 720;
+
+        traders["54cb50c76803fa8b248b4571"].base.loyaltyLevels.forEach((loyaltyLevel) => {
+            loyaltyLevel.insurance_price_coef = 0.01;
+        })
+        traders["54cb57776803fa99248b456e"].base.loyaltyLevels.forEach((loyaltyLevel) => {
+            loyaltyLevel.insurance_price_coef = 0.01;
+        })
+
         traders["54cb50c76803fa8b248b4571"].base.insurance.min_return_hour = 0;
         traders["54cb50c76803fa8b248b4571"].base.insurance.max_return_hour = 1;
         traders["54cb57776803fa99248b456e"].base.insurance.min_return_hour = 0;
