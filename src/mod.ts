@@ -109,25 +109,6 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
             this.logger.success(`[${this.mod}] RagfairSellHelper functions hooked.`)
         }
 
-        if (this.config.loot.enable && this.config.loot._DANGER_forceSpawnAllLoosedLoot_DANEGR_)
-        {
-            container.afterResolution("LocationGenerator", (_t, result: LocationGenerator) =>
-            {
-                result.generateDynamicLoot = (
-                    dynamicLootDist: ILooseLoot,
-                    staticAmmoDist: Record<string, IStaticAmmoDetails[]>,
-                    locationName: string
-                ): SpawnpointTemplate[] =>
-                {
-                    this.logger.warning(`[${this.mod}] !!!FORCING ALL LOOSED LOOT TO SPAWN!!! EXPECT LOW IN-GAME PERFORMANCE!!!`)
-                    const loot = this.generateDynamicLootOverwrite(result, dynamicLootDist, staticAmmoDist, locationName)
-                    this.logger.success(`[${this.mod}] Location ${locationName} total item spawn count: ${loot.length}`)
-                    return loot
-                }
-            })
-            this.logger.success(`[${this.mod}] LocationGenerator functions hooked.`)
-        }
-
         if (this.config.repair.enable)
         {
             const repairConfig = configServer.getConfig<IRepairConfig>(ConfigTypes.REPAIR)
@@ -176,98 +157,6 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.info(`[${this.mod}] Using backend <${httpConfig.backendIp}> listened on <${httpConfig.ip}>`);
 
         this.logger.info(`[${this.mod}] preAki Loaded`);
-    }
-
-    private generateDynamicLootOverwrite(
-        self: LocationGenerator,
-        dynamicLootDist: ILooseLoot,
-        staticAmmoDist: Record<string, IStaticAmmoDetails[]>,
-        locationName: string
-    ): SpawnpointTemplate[]
-    {
-        // some prep work for the protected fields
-        const seasonalEventService: SeasonalEventService = self["seasonalEventService"]
-        const localisationService: LocalisationService = self["localisationService"]
-        const locationConfig: ILocationConfig = self["locationConfig"]
-
-        const loot: SpawnpointTemplate[] = [];
-
-        // Add all forced loot to return array
-        // const addForcedLoot: (lootLocationTemplates: SpawnpointTemplate[], forcedSpawnPoints: SpawnpointsForced[], locationName: string) => void = self["addForcedLoot"]
-        self["addForcedLoot"](loot, dynamicLootDist.spawnpointsForced, locationName);
-
-        const blacklistedSpawnpoints = locationConfig.looseLootBlacklist[locationName];
-        const chosenSpawnpoints = dynamicLootDist.spawnpoints.filter((sp) =>
-        {
-            return !blacklistedSpawnpoints?.includes(sp.template.Id)
-        })
-
-        //=== skip all the random and probability crap ===
-
-        // Iterate over spawnpoints
-        const seasonalEventActive = seasonalEventService.seasonalEventEnabled();
-        const seasonalItemTplBlacklist = seasonalEventService.getInactiveSeasonalEventItems();
-        for (const spawnPoint of chosenSpawnpoints)
-        {
-            if (!spawnPoint.template)
-            {
-                this.logger.warning(
-                    localisationService.getText("location-missing_dynamic_template", spawnPoint.locationId)
-                );
-
-                continue;
-            }
-
-            if (!spawnPoint.template.Items || spawnPoint.template.Items.length === 0)
-            {
-                this.logger.error(
-                    localisationService.getText("location-spawnpoint_missing_items", spawnPoint.template.Id)
-                );
-
-                continue;
-            }
-
-            const itemArray = spawnPoint.itemDistribution.filter((itemDist) =>
-            {
-                const shouldNotKeep =
-                    !seasonalEventActive && seasonalItemTplBlacklist.includes(
-                        spawnPoint.template.Items.find((x) => x._id === itemDist.composedKey.key)._tpl
-                    )
-                return !shouldNotKeep
-            })
-
-            if (itemArray.length === 0)
-            {
-                this.logger.warning(`Loot pool for position: ${spawnPoint.template.Id} is empty. Skipping`);
-
-                continue;
-            }
-
-            // skip all the random crap, we want EVERY single possible item to ALL spawn
-            for (const itemDist of itemArray)
-            {
-                const chosenComposedKey = itemDist.composedKey.key
-                try
-                {
-                    const createItemResult = self["createDynamicLootItem"](chosenComposedKey, spawnPoint, staticAmmoDist);
-
-                    // need to clone this
-                    // we are creating multiple spawns at the same spawn point
-                    const template = this.jsonUtil.clone(spawnPoint.template)
-                    template.useGravity = false // or it could take ages to simulation the physical
-                    // Root id can change when generating a weapon
-                    template.Root = createItemResult.items[0]._id;
-                    template.Items = createItemResult.items;
-
-                    loot.push(template);
-                }
-                catch (e)
-                {
-                    this.logger.warning(`[${this.mod}] Failed to create loot ${itemDist} at ${spawnPoint.locationId}`);
-                }
-            }
-        }
-        return loot
     }
 
     public postDBLoad(container: DependencyContainer): void

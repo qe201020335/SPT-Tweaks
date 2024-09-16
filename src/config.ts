@@ -184,7 +184,6 @@ export class LootConfig
     ]);
     disableContainerRandomization: boolean = true;
     forceAllSpawnPoints: boolean = false
-    _DANGER_forceSpawnAllLoosedLoot_DANEGR_: boolean = false;
 }
 
 export class TraderConfig
