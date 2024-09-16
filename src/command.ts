@@ -1,14 +1,14 @@
-import {ICommandoCommand} from "@spt-aki/helpers/Dialogue/Commando/ICommandoCommand";
-import {IUserDialogInfo} from "@spt-aki/models/eft/profile/IAkiProfile";
-import {ISendMessageRequest} from "@spt-aki/models/eft/dialog/ISendMessageRequest";
+import {IUserDialogInfo} from "@spt/models/eft/profile/ISptProfile";
+import {ISendMessageRequest} from "@spt/models/eft/dialog/ISendMessageRequest";
 import {DependencyContainer} from "tsyringe";
-import {ILogger} from "@spt-aki/models/spt/utils/ILogger";
-import {IPmcConfig} from "@spt-aki/models/spt/config/IPmcConfig";
-import {ConfigTypes} from "@spt-aki/models/enums/ConfigTypes";
-import {ConfigServer} from "@spt-aki/servers/ConfigServer";
-import {MailSendService} from "@spt-aki/services/MailSendService";
+import {ILogger} from "@spt/models/spt/utils/ILogger";
+import {IPmcConfig} from "@spt/models/spt/config/IPmcConfig";
+import {ConfigTypes} from "@spt/models/enums/ConfigTypes";
+import {ConfigServer} from "@spt/servers/ConfigServer";
+import {MailSendService} from "@spt/services/MailSendService";
+import {IChatCommand} from "@spt/helpers/Dialogue/Commando/IChatCommand";
 
-export class TweaksCommand implements ICommandoCommand
+export class TweaksCommand implements IChatCommand
 {
     private logger: ILogger
     protected mailSendService: MailSendService

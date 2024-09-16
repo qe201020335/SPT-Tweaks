@@ -1,52 +1,49 @@
 import {DependencyContainer} from "tsyringe";
 
 // SPT types
-import {IPostDBLoadMod} from "@spt-aki/models/external/IPostDBLoadMod";
-import {IPreAkiLoadMod} from "@spt-aki/models/external/IPreAkiLoadMod";
-import {IDatabaseTables} from "@spt-aki/models/spt/server/IDatabaseTables";
-import {ILocations} from "@spt-aki/models/spt/server/ILocations";
-import {ILogger} from "@spt-aki/models/spt/utils/ILogger";
-import {DatabaseServer} from "@spt-aki/servers/DatabaseServer";
+import {IPostDBLoadMod} from "@spt/models/external/IPostDBLoadMod";
+import {IPreSptLoadMod} from "@spt/models/external/IPreSptLoadMod";
+import {IDatabaseTables} from "@spt/models/spt/server/IDatabaseTables";
+import {ILocations} from "@spt/models/spt/server/ILocations";
+import {ILogger} from "@spt/models/spt/utils/ILogger";
+import {DatabaseServer} from "@spt/servers/DatabaseServer";
 
 
-import {ConfigTypes} from "@spt-aki/models/enums/ConfigTypes";
-import {IPmcConfig} from "@spt-aki/models/spt/config/IPmcConfig";
-import {ConfigServer} from "@spt-aki/servers/ConfigServer";
-import {RagfairSellHelper} from "@spt-aki/helpers/RagfairSellHelper";
-import {IRagfairConfig} from "@spt-aki/models/spt/config/IRagfairConfig";
-import {ILocationConfig} from "@spt-aki/models/spt/config/ILocationConfig";
-import {IInsuranceConfig} from "@spt-aki/models/spt/config/IInsuranceConfig";
+import {ConfigTypes} from "@spt/models/enums/ConfigTypes";
+import {IPmcConfig} from "@spt/models/spt/config/IPmcConfig";
+import {ConfigServer} from "@spt/servers/ConfigServer";
+import {RagfairSellHelper} from "@spt/helpers/RagfairSellHelper";
+import {IRagfairConfig} from "@spt/models/spt/config/IRagfairConfig";
+import {ILocationConfig} from "@spt/models/spt/config/ILocationConfig";
+import {IInsuranceConfig} from "@spt/models/spt/config/IInsuranceConfig";
 
-import {FenceConfig, ITraderConfig} from "@spt-aki/models/spt/config/ITraderConfig";
-import {MinMax} from "@spt-aki/models/common/MinMax";
-import {ILooseLoot, SpawnpointTemplate} from "@spt-aki/models/eft/common/ILooseLoot";
-import {JsonUtil} from "@spt-aki/utils/JsonUtil";
-import {IStaticAmmoDetails} from "@spt-aki/models/eft/common/tables/ILootBase";
-import {LocationGenerator} from "@spt-aki/generators/LocationGenerator";
-import {SeasonalEventService} from "@spt-aki/services/SeasonalEventService";
-import {LocalisationService} from "@spt-aki/services/LocalisationService";
-import {MathUtil} from "@spt-aki/utils/MathUtil";
-import {ILocationBase} from "@spt-aki/models/eft/common/ILocationBase";
-import {IHttpConfig} from "@spt-aki/models/spt/config/IHttpConfig";
+import {FenceConfig, ITraderConfig} from "@spt/models/spt/config/ITraderConfig";
+import {MinMax} from "@spt/models/common/MinMax";
+import {ILooseLoot, SpawnpointTemplate} from "@spt/models/eft/common/ILooseLoot";
+import {JsonUtil} from "@spt/utils/JsonUtil";
+import {MathUtil} from "@spt/utils/MathUtil";
+import {ILocationBase} from "@spt/models/eft/common/ILocationBase";
+import {IHttpConfig} from "@spt/models/spt/config/IHttpConfig";
 import {Serializer, TweakConfig} from "./config";
 import path from "path";
 import fs from "node:fs";
-import {ICoreConfig} from "@spt-aki/models/spt/config/ICoreConfig";
-import {IBotConfig} from "@spt-aki/models/spt/config/IBotConfig";
-import {IQuest} from "@spt-aki/models/eft/common/tables/IQuest";
-import {ItemHelper} from "@spt-aki/helpers/ItemHelper";
-import {BaseClasses} from "@spt-aki/models/enums/BaseClasses";
-import {IRepairConfig} from "@spt-aki/models/spt/config/IRepairConfig";
-import {RepairHelper} from "@spt-aki/helpers/RepairHelper";
-import {ITemplateItem} from "@spt-aki/models/eft/common/tables/ITemplateItem";
-import {Item} from "@spt-aki/models/eft/common/tables/IItem";
-import {IPostAkiLoadMod} from "@spt-aki/models/external/IPostAkiLoadMod";
-import {CommandoDialogueChatBot} from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
+import {ICoreConfig} from "@spt/models/spt/config/ICoreConfig";
+import {IBotConfig} from "@spt/models/spt/config/IBotConfig";
+import {IQuest} from "@spt/models/eft/common/tables/IQuest";
+import {ItemHelper} from "@spt/helpers/ItemHelper";
+import {BaseClasses} from "@spt/models/enums/BaseClasses";
+import {IRepairConfig} from "@spt/models/spt/config/IRepairConfig";
+import {RepairHelper} from "@spt/helpers/RepairHelper";
+import {ITemplateItem} from "@spt/models/eft/common/tables/ITemplateItem";
+import {Item} from "@spt/models/eft/common/tables/IItem";
+import {IPostSptLoadMod} from "@spt/models/external/IPostSptLoadMod";
+import {CommandoDialogueChatBot} from "@spt/helpers/Dialogue/CommandoDialogueChatBot";
 import {TweaksCommand} from "./command";
+import {SptCommandoCommands} from "@spt/helpers/Dialogue/Commando/SptCommandoCommands";
 
 const prisciluId = "Priscilu";
 
-class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
+class SkyTweaks implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
 {
     private readonly mod: string
     private readonly names: Map<string, string>
@@ -82,7 +79,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         fs.writeFileSync(configPath, Serializer.serializeToJsonString(this.config));
     }
 
-    public preAkiLoad(container: DependencyContainer): void
+    public preSptLoad(container: DependencyContainer): void
     {
         this.logger = container.resolve<ILogger>("WinstonLogger");
         this.logger.info(`[${this.mod}] preAki Loading... `)
@@ -255,13 +252,13 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.debug(`[${this.mod}] postDb Loaded`);
     }
 
-    public postAkiLoad(container: DependencyContainer)
+    public postSptLoad(container: DependencyContainer)
     {
         if (this.config.enableTweaksCommand)
         {
             container
                 .resolve<CommandoDialogueChatBot>("CommandoDialogueChatBot")
-                .registerCommandoCommand(new TweaksCommand(container))
+                .registerChatCommand(new TweaksCommand(container))
 
             this.logger.info(`[${this.mod}] TweaksCommand registered`)
         }
@@ -422,8 +419,8 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         const insuranceConfig = configServer.getConfig<IInsuranceConfig>(ConfigTypes.INSURANCE)
         const traders = tables.traders
 
-        insuranceConfig.insuranceMultiplier["54cb50c76803fa8b248b4571"] = 0.01;
-        insuranceConfig.insuranceMultiplier["54cb57776803fa99248b456e"] = 0.01;
+        // insuranceConfig.insuranceMultiplier["54cb50c76803fa8b248b4571"] = 0.01;
+        // insuranceConfig.insuranceMultiplier["54cb57776803fa99248b456e"] = 0.01;
         insuranceConfig.returnChancePercent["54cb50c76803fa8b248b4571"] = 100;
         insuranceConfig.returnChancePercent["54cb57776803fa99248b456e"] = 100;
         globals.Insurance.MaxStorageTimeInHour = 720;
@@ -716,7 +713,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.success(`[${this.mod}] price multi: ${fence.itemPriceMult}, ${fence.presetPriceMult}`)
 
         fence.regenerateAssortsOnRefresh = conf.regenerateOnRefresh
-        fence.chancePlateExistsInArmorPercent = conf.armorWithPlatesChance
+        for (const type in fence.chancePlateExistsInArmorPercent)
+        {
+            fence.chancePlateExistsInArmorPercent[type] = conf.armorWithPlatesChance
+        }
 
         fence.armorMaxDurabilityPercentMinMax.max = { min: conf.maxDurability, max: conf.maxDurability }
         fence.armorMaxDurabilityPercentMinMax.current = { min: conf.minCurrDurability, max: conf.maxDurability }
