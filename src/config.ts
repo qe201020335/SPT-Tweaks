@@ -160,6 +160,8 @@ export class PmcConfig
         ["pmcbot", 40],
         ["assault", 30]
     ]);
+    usecChance: number = 50;
+    sameSideHostileChance: number = 90;
 }
 
 export class RagfairConfig

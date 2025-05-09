@@ -598,6 +598,12 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
                 this.logger.success(`[${this.mod}] PMC from ${botName} conversion rate: ${rate}%`)
             }
         }
+
+        pmcConfig.isUsec = pmc.usecChance;
+        this.logger.success(`[${this.mod}] PMC is USEC chance: ${pmcConfig.isUsec}%`)
+
+        pmcConfig.chanceSameSideIsHostilePercent = pmc.sameSideHostileChance;
+        this.logger.success(`[${this.mod}] PMC same side hostile chance: ${pmcConfig.chanceSameSideIsHostilePercent}%`)
     }
 
     private allowThingsInHolster(tables: IDatabaseTables)
