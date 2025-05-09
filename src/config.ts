@@ -185,7 +185,8 @@ export class LootConfig
         ["rezervbase", 2.5]
     ]);
     disableContainerRandomization: boolean = true;
-    forceAllSpawnPoints: boolean = false
+    forceAllSpawnPoints: boolean = false;
+    invertLootDistribution: boolean = false;
 }
 
 export class TraderConfig

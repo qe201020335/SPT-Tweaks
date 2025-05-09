@@ -671,8 +671,46 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
                 }
             }
         }
+
+        if (this.config.loot.invertLootDistribution)
+        {
+            this.logger.info(`[${this.mod}] Inverting loosed loot distribution`)
+            for (const locationName in locations)
+            {
+                this.logger.debug(`[${this.mod}] Attempting ${locationName}`)
+                if (locationName != "base" && locationName != "hideout" && locations[locationName]["looseLoot"])
+                {
+                    const looseLoot: ILooseLoot = locations[locationName]["looseLoot"]
+                    const spawnPoints = looseLoot.spawnpoints;
+
+                    for (const spawnPoint of spawnPoints)
+                    {
+                        const distribution = spawnPoint.itemDistribution;
+                        this.invertWeightGeneric(
+                            distribution,
+                            (item) => item.relativeProbability,
+                            (item, weight) => item.relativeProbability = weight
+                        )
+
+                        // this.logger.success(`[${this.mod}] inverted weights: ${JSON.stringify(distribution)}`)
+                    }
+                }
+                this.logger.success(`[${this.mod}] ${locationName} loosed loot pool probability distribution inverted`)
+            }
+        }
     }
 
+    private invertWeightGeneric<T>(items: T[], getWeight: (item: T) => number, setWeight: (item: T, weight: number) => void)
+    {
+        const itemsCopy = new Array(...items);
+        itemsCopy.sort((a, b) => getWeight(a) - getWeight(b)); // sort items by weight
+        const weights = items.map(getWeight).sort((a, b) => b - a); // reverse sort weights
+
+        for (let i = 0; i < items.length; i++)
+        {
+            setWeight(items[i], weights[i])
+        }
+    }
 
     private tweakTraders(traderConfig: ITraderConfig)
     {
@@ -826,16 +864,6 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
                 }
             }
         }
-    }
-
-    private invertWeight(weights: Record<string, number>)
-    {
-        const highest = Math.max(...Object.values(weights));
-        for (const key in weights)
-        {
-            highest[key] = Math.round((1 / highest[key]) * highest);
-        }
-        // this.reduceWeightValues(this.backpackLootPool);
     }
 
     private tweakQuests(quests: Record<string, IQuest>)
