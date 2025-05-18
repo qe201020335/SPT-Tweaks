@@ -39,8 +39,14 @@ import {Item} from "@spt-aki/models/eft/common/tables/IItem";
 import {IPostAkiLoadMod} from "@spt-aki/models/external/IPostAkiLoadMod";
 import {CommandoDialogueChatBot} from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
 import {TweaksChatCommand} from "./Commands/TweaksChatCommand";
+import {ILootBase} from "@spt-aki/models/eft/common/tables/ILootBase";
 
 const prisciluId = "Priscilu";
+
+interface ICommonRelativeProbability
+{
+    relativeProbability: number;
+}
 
 class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 {
@@ -92,7 +98,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
             // Override aki's ragfair offer sell chance calculation
             container.afterResolution("RagfairSellHelper", (_t, result: RagfairSellHelper) =>
             {
-                result.calculateSellChance = (averageOfferPriceRub: number, playerListedPriceRub: number, qualityMultiplier: number) => 
+                result.calculateSellChance = (averageOfferPriceRub: number, playerListedPriceRub: number, qualityMultiplier: number) =>
                 {
                     const chances = container.resolve<ConfigServer>("ConfigServer").getConfig<IRagfairConfig>(ConfigTypes.RAGFAIR).sell.chance
                     const base = chances.base * qualityMultiplier;
@@ -240,7 +246,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 
         if (this.config.loot.enable)
         {
-            this.lootMultiplier(locationConfig, tables.locations)
+            this.lootMultiplier(locationConfig, tables.locations, tables.loot)
         }
 
         if (this.config.trader.enable)
@@ -263,19 +269,19 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.debug(`[${this.mod}] postDb Loaded`);
     }
 
-    private loadItemNames(tables: IDatabaseTables) 
+    private loadItemNames(tables: IDatabaseTables)
     {
         this.names.clear()
         const locals = tables.locales.global["en"]
         const dbItems = tables.templates.items
-        for (const dbItemsKey in dbItems) 
+        for (const dbItemsKey in dbItems)
         {
             const item = dbItems[dbItemsKey]
-            if (`${item._id} Name` in locals) 
+            if (`${item._id} Name` in locals)
             {
                 this.names[item._id] = locals[`${item._id} Name`]
-            } 
-            else 
+            }
+            else
             {
                 this.names[item._id] = item._name
             }
@@ -432,10 +438,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.success(`[${this.mod}] Insurance is working in The Lab`)
     }
 
-    private filterPriscilu(tables: IDatabaseTables) 
+    private filterPriscilu(tables: IDatabaseTables)
     {
         this.logger.info(`[${this.mod}] Filtering Priscilu's Items`)
-        if (!(prisciluId in tables.traders)) 
+        if (!(prisciluId in tables.traders))
         {
             this.logger.warning(`[${this.mod}] Priscilu not installed, skipped.`)
             return
@@ -445,10 +451,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         const exceptions = new Set<string>(this.config.priscilu.filterException)
 
         let removed = 0
-        priscilu.assort.items = priscilu.assort.items.filter((item) => 
+        priscilu.assort.items = priscilu.assort.items.filter((item) =>
         {
             const dbItem = dbItems[item._tpl]
-            if (exceptions.has(item._tpl) || dbItem._props.CanSellOnRagfair === false) 
+            if (exceptions.has(item._tpl) || dbItem._props.CanSellOnRagfair === false)
             {
                 return true;
             }
@@ -458,7 +464,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.success(`[${this.mod}] Priscilu's Items removed: ${removed}`)
     }
 
-    private changeBossSpawnRate(tables: IDatabaseTables) 
+    private changeBossSpawnRate(tables: IDatabaseTables)
     {
         this.logger.info(`[${this.mod}] Modifying boss spawn rate`)
 
@@ -468,10 +474,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         if (bossSpawn.unified && !isNaN(bossSpawn.unifiedChance))
         {
             this.logger.info(`[${this.mod}] Boss spawn rate is UNIFIED!`)
-            for (const i in locations) 
+            for (const i in locations)
             {
                 const location = locations[i];
-                if (i === "base") 
+                if (i === "base")
                 {
                     continue
                 }
@@ -623,7 +629,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.logger.success(`[${this.mod}] Ragfair sell chance: ${ragfairConfig.sell.chance.base}% [${ragfairConfig.sell.chance.minSellChancePercent}%, ${ragfairConfig.sell.chance.maxSellChancePercent}%] `)
     }
 
-    private lootMultiplier(locationConfig: ILocationConfig, locations: ILocations)
+    private lootMultiplier(locationConfig: ILocationConfig, locations: ILocations, lootTable: ILootBase)
     {
         this.logger.info(`[${this.mod}] Multiplying loot`)
         if (this.config.loot.useGlobalMultiplier)
@@ -686,18 +692,37 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
                     for (const spawnPoint of spawnPoints)
                     {
                         const distribution = spawnPoint.itemDistribution;
-                        this.invertWeightGeneric(
-                            distribution,
-                            (item) => item.relativeProbability,
-                            (item, weight) => item.relativeProbability = weight
-                        )
-
+                        this.invertWeightCommon(distribution);
                         // this.logger.success(`[${this.mod}] inverted weights: ${JSON.stringify(distribution)}`)
                     }
                 }
                 this.logger.success(`[${this.mod}] ${locationName} loosed loot pool probability distribution inverted`)
             }
+
+            // invert static loot table
+            const staticLoot = lootTable.staticLoot
+            for (const key in staticLoot)
+            {
+                this.invertWeightCommon(staticLoot[key].itemDistribution);
+                this.invertWeightCommon(staticLoot[key].itemcountDistribution);
+                this.logger.success(`[${this.mod}] ${this.names[key]} loot pool probability distribution inverted`)
+            }
+
+            const staticAmmo = lootTable.staticAmmo
+            for (const key in staticAmmo)
+            {
+                this.invertWeightCommon(staticAmmo[key]);
+                this.logger.success(`[${this.mod}] ${key} static ammo pool probability distribution inverted`)
+            }
         }
+    }
+
+    private invertWeightCommon(items: ICommonRelativeProbability[])
+    {
+        this.invertWeightGeneric(items,
+            (item) => item.relativeProbability,
+            (item, weight) => item.relativeProbability = weight
+        );
     }
 
     private invertWeightGeneric<T>(items: T[], getWeight: (item: T) => number, setWeight: (item: T, weight: number) => void)
