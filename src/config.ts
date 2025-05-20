@@ -96,6 +96,7 @@ export class TweakConfig
     quest: QuestConfig = new QuestConfig();
     item: ItemConfig = new ItemConfig();
     repair: RepairConfig = new RepairConfig();
+    exp: ExpConfig = new ExpConfig();
 }
 
 export class NetworkConfig
@@ -244,4 +245,10 @@ export class RepairConfig
     enable: boolean = false;
     noRepairDamage: boolean = true;
     resetDurability: boolean = false;
+}
+
+export class ExpConfig
+{
+    enable: boolean = false;
+    expMultiplier: number = 2.5;
 }

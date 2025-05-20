@@ -40,6 +40,7 @@ import { IPostAkiLoadMod } from "@spt-aki/models/external/IPostAkiLoadMod";
 import { CommandoDialogueChatBot } from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
 import { TweaksChatCommand } from "./Commands/TweaksChatCommand";
 import { ILootBase } from "@spt-aki/models/eft/common/tables/ILootBase";
+import { IExp } from "@spt-aki/models/eft/common/IGlobals";
 
 const prisciluId = "Priscilu";
 
@@ -263,6 +264,11 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         if (this.config.quest.enable)
         {
             this.tweakQuests(tables.templates.quests)
+        }
+
+        if (this.config.exp.enable)
+        {
+            this.tweakExp(tables)
         }
 
         // this.logger.info(`[${this.mod}] Misc`)
@@ -757,9 +763,9 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         //assort size
         const sizeMulti = conf.assortSizeMulti
         this.logger.info(`[${this.mod}] multiplying fence listing by ${sizeMulti}`)
-        fence.weaponPresetMinMax = this.scaleMinMax(fence.weaponPresetMinMax, sizeMulti, true)
+        this.scaleMinMax(fence.weaponPresetMinMax, sizeMulti, true)
         this.logger.debug(`[${this.mod}] guns: [${fence.weaponPresetMinMax.min}, ${fence.weaponPresetMinMax.max}]`)
-        fence.equipmentPresetMinMax = this.scaleMinMax(fence.equipmentPresetMinMax, sizeMulti, true)
+        this.scaleMinMax(fence.equipmentPresetMinMax, sizeMulti, true)
         this.logger.debug(`[${this.mod}] equips: [${fence.equipmentPresetMinMax.min}, ${fence.equipmentPresetMinMax.max}]`)
         let total = 0;
         for (const type in fence.itemTypeLimits)
@@ -845,12 +851,10 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         return filtered
     }
 
-    private scaleMinMax(input: MinMax, multi: number, round: boolean): MinMax
+    private scaleMinMax(input: { min: number, max: number }, multi: number, round: boolean)
     {
-        return {
-            max: round ? Math.round(input.max * multi) : input.max,
-            min: round ? Math.round(input.min * multi) : input.min
-        }
+        input.min = round ? Math.round(input.min * multi) : input.min * multi
+        input.max = round ? Math.round(input.max * multi) : input.max * multi
     }
 
     private tweakRaids(locations: ILocations)
@@ -919,6 +923,50 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
                         }
                     }
                 })
+            }
+        }
+    }
+
+    private tweakExp(tables: IDatabaseTables)
+    {
+        const exp = tables.globals.config.exp;
+        const multi = this.config.exp.expMultiplier;
+
+        exp.expForLockedDoorBreach = Math.round(exp.expForLockedDoorBreach * multi);
+        exp.expForLockedDoorOpen = Math.round(exp.expForLockedDoorOpen * multi);
+        exp.heal.expForEnergy = Math.round(exp.heal.expForEnergy * multi);
+        exp.heal.expForHeal = Math.round(exp.heal.expForHeal * multi);
+        exp.heal.expForHydration = Math.round(exp.heal.expForHydration * multi);
+        exp.kill.bloodLossToLitre *= multi;
+        exp.kill.botExpOnDamageAllHealth = Math.round(exp.kill.botExpOnDamageAllHealth * multi);
+        exp.kill.botHeadShotMult *= multi;
+        exp.kill.combo.forEach((item) => item.percent = Math.round(item.percent * multi));
+        exp.kill.pmcExpOnDamageAllHealth = Math.round(exp.kill.pmcExpOnDamageAllHealth * multi);
+        exp.kill.pmcHeadShotMult *= multi;
+        exp.kill.victimBotLevelExp = Math.round(exp.kill.victimBotLevelExp * multi);
+        exp.kill.victimLevelExp = Math.round(exp.kill.victimLevelExp * multi);
+        exp.loot_attempts.forEach((item) => item.k_exp *= multi);
+        exp.match_end.killedMult *= multi;
+        exp.match_end.leftMult *= multi;
+        exp.match_end.miaMult *= multi;
+        exp.match_end.mia_exp_reward = Math.round(exp.match_end.mia_exp_reward * multi);
+        exp.match_end.runnerMult *= multi;
+        exp.match_end.runner_exp_reward = Math.round(exp.match_end.runner_exp_reward * multi);
+        exp.match_end.survivedMult *= multi;
+        exp.match_end.survived_exp_reward = Math.round(exp.match_end.survived_exp_reward * multi);
+        exp.triggerMult *= multi;
+
+        this.logger.success(`[${this.mod}] Gameplay experience multiplied by ${multi}`)
+
+        // kill reward for each bot
+        for (const type in tables.bots.types)
+        {
+            const bot = tables.bots.types[type];
+            const reward = bot.experience.reward;
+            if (reward.min > 0 && reward.max > 0)
+            {
+                this.scaleMinMax(reward, multi, true);
+                this.logger.success(`[${this.mod}] Bot ${type} experience reward: [${bot.experience.reward.min}, ${bot.experience.reward.max}]`)
             }
         }
     }
