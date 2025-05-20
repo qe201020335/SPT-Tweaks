@@ -1,7 +1,7 @@
-import {ConfigServer} from "@spt-aki/servers/ConfigServer";
-import {IPmcConfig} from "@spt-aki/models/spt/config/IPmcConfig";
-import {ConfigTypes} from "@spt-aki/models/enums/ConfigTypes";
-import {CommandTweakOption} from "./CommandTweakOption";
+import { ConfigServer } from "@spt-aki/servers/ConfigServer";
+import { IPmcConfig } from "@spt-aki/models/spt/config/IPmcConfig";
+import { ConfigTypes } from "@spt-aki/models/enums/ConfigTypes";
+import { CommandTweakOption } from "./CommandTweakOption";
 
 export class PMCConversionTweakOption extends CommandTweakOption
 {
@@ -57,7 +57,7 @@ export class PMCConversionTweakOption extends CommandTweakOption
             return "Not a number"
         }
 
-        pmcConfig.convertIntoPmcChance[botType] = {max: ratio, min: ratio}
+        pmcConfig.convertIntoPmcChance[botType] = { max: ratio, min: ratio }
         return "Success"
     }
 

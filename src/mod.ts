@@ -1,45 +1,45 @@
-import {DependencyContainer} from "tsyringe";
+import { DependencyContainer } from "tsyringe";
 
 // SPT types
-import {IPostDBLoadMod} from "@spt-aki/models/external/IPostDBLoadMod";
-import {IPreAkiLoadMod} from "@spt-aki/models/external/IPreAkiLoadMod";
-import {IDatabaseTables} from "@spt-aki/models/spt/server/IDatabaseTables";
-import {ILocations} from "@spt-aki/models/spt/server/ILocations";
-import {ILogger} from "@spt-aki/models/spt/utils/ILogger";
-import {DatabaseServer} from "@spt-aki/servers/DatabaseServer";
+import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
+import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
+import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
+import { ILocations } from "@spt-aki/models/spt/server/ILocations";
+import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
 
 
-import {ConfigTypes} from "@spt-aki/models/enums/ConfigTypes";
-import {IPmcConfig} from "@spt-aki/models/spt/config/IPmcConfig";
-import {ConfigServer} from "@spt-aki/servers/ConfigServer";
-import {RagfairSellHelper} from "@spt-aki/helpers/RagfairSellHelper";
-import {IRagfairConfig} from "@spt-aki/models/spt/config/IRagfairConfig";
-import {ILocationConfig} from "@spt-aki/models/spt/config/ILocationConfig";
-import {IInsuranceConfig} from "@spt-aki/models/spt/config/IInsuranceConfig";
+import { ConfigTypes } from "@spt-aki/models/enums/ConfigTypes";
+import { IPmcConfig } from "@spt-aki/models/spt/config/IPmcConfig";
+import { ConfigServer } from "@spt-aki/servers/ConfigServer";
+import { RagfairSellHelper } from "@spt-aki/helpers/RagfairSellHelper";
+import { IRagfairConfig } from "@spt-aki/models/spt/config/IRagfairConfig";
+import { ILocationConfig } from "@spt-aki/models/spt/config/ILocationConfig";
+import { IInsuranceConfig } from "@spt-aki/models/spt/config/IInsuranceConfig";
 
-import {FenceConfig, ITraderConfig} from "@spt-aki/models/spt/config/ITraderConfig";
-import {MinMax} from "@spt-aki/models/common/MinMax";
-import {ILooseLoot} from "@spt-aki/models/eft/common/ILooseLoot";
-import {JsonUtil} from "@spt-aki/utils/JsonUtil";
-import {MathUtil} from "@spt-aki/utils/MathUtil";
-import {ILocationBase} from "@spt-aki/models/eft/common/ILocationBase";
-import {IHttpConfig} from "@spt-aki/models/spt/config/IHttpConfig";
-import {Serializer, TweakConfig} from "./config";
+import { FenceConfig, ITraderConfig } from "@spt-aki/models/spt/config/ITraderConfig";
+import { MinMax } from "@spt-aki/models/common/MinMax";
+import { ILooseLoot } from "@spt-aki/models/eft/common/ILooseLoot";
+import { JsonUtil } from "@spt-aki/utils/JsonUtil";
+import { MathUtil } from "@spt-aki/utils/MathUtil";
+import { ILocationBase } from "@spt-aki/models/eft/common/ILocationBase";
+import { IHttpConfig } from "@spt-aki/models/spt/config/IHttpConfig";
+import { Serializer, TweakConfig } from "./config";
 import path from "path";
 import fs from "node:fs";
-import {ICoreConfig} from "@spt-aki/models/spt/config/ICoreConfig";
-import {IBotConfig} from "@spt-aki/models/spt/config/IBotConfig";
-import {IQuest} from "@spt-aki/models/eft/common/tables/IQuest";
-import {ItemHelper} from "@spt-aki/helpers/ItemHelper";
-import {BaseClasses} from "@spt-aki/models/enums/BaseClasses";
-import {IRepairConfig} from "@spt-aki/models/spt/config/IRepairConfig";
-import {RepairHelper} from "@spt-aki/helpers/RepairHelper";
-import {ITemplateItem} from "@spt-aki/models/eft/common/tables/ITemplateItem";
-import {Item} from "@spt-aki/models/eft/common/tables/IItem";
-import {IPostAkiLoadMod} from "@spt-aki/models/external/IPostAkiLoadMod";
-import {CommandoDialogueChatBot} from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
-import {TweaksChatCommand} from "./Commands/TweaksChatCommand";
-import {ILootBase} from "@spt-aki/models/eft/common/tables/ILootBase";
+import { ICoreConfig } from "@spt-aki/models/spt/config/ICoreConfig";
+import { IBotConfig } from "@spt-aki/models/spt/config/IBotConfig";
+import { IQuest } from "@spt-aki/models/eft/common/tables/IQuest";
+import { ItemHelper } from "@spt-aki/helpers/ItemHelper";
+import { BaseClasses } from "@spt-aki/models/enums/BaseClasses";
+import { IRepairConfig } from "@spt-aki/models/spt/config/IRepairConfig";
+import { RepairHelper } from "@spt-aki/helpers/RepairHelper";
+import { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
+import { Item } from "@spt-aki/models/eft/common/tables/IItem";
+import { IPostAkiLoadMod } from "@spt-aki/models/external/IPostAkiLoadMod";
+import { CommandoDialogueChatBot } from "@spt-aki/helpers/Dialogue/CommandoDialogueChatBot";
+import { TweaksChatCommand } from "./Commands/TweaksChatCommand";
+import { ILootBase } from "@spt-aki/models/eft/common/tables/ILootBase";
 
 const prisciluId = "Priscilu";
 
@@ -58,6 +58,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
     private logger: ILogger
     private jsonUtil: JsonUtil
     private mathUtil: MathUtil
+
     constructor()
     {
         this.mod = "SkyTweaks"; // Set name of mod, so we can log it to console later
@@ -71,14 +72,14 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         const configPath = path.resolve(configDir, "config.json")
         if (fs.existsSync(configPath))
         {
-            fs.copyFileSync(configPath, configPath+".bak.json")
+            fs.copyFileSync(configPath, configPath + ".bak.json")
             console.log(`[${this.mod}] config file backup finish`)
             Serializer.populateFromJsonString(this.config, fs.readFileSync(configPath).toString())
             console.log(`[${this.mod}] config loaded`)
         }
         else
         {
-            fs.mkdirSync(configDir, {recursive: true})
+            fs.mkdirSync(configDir, { recursive: true })
         }
 
         fs.writeFileSync(configPath, Serializer.serializeToJsonString(this.config));
@@ -600,7 +601,7 @@ class SkyTweaks implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
             }
             else
             {
-                pmcConfig.convertIntoPmcChance[botName] = {min: rate, max: rate}
+                pmcConfig.convertIntoPmcChance[botName] = { min: rate, max: rate }
                 this.logger.success(`[${this.mod}] PMC from ${botName} conversion rate: ${rate}%`)
             }
         }

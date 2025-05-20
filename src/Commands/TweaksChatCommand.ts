@@ -1,11 +1,11 @@
-import {IUserDialogInfo} from "@spt-aki/models/eft/profile/IAkiProfile";
-import {ISendMessageRequest} from "@spt-aki/models/eft/dialog/ISendMessageRequest";
-import {DependencyContainer} from "tsyringe";
-import {ILogger} from "@spt-aki/models/spt/utils/ILogger";
-import {MailSendService} from "@spt-aki/services/MailSendService";
-import {IChatCommand} from "@spt-aki/helpers/Dialogue/Commando/IChatCommand";
-import {CommandTweakOption} from "./TweakOptions/CommandTweakOption";
-import {PMCConversionTweakOption} from "./TweakOptions/PMCConversionTweakOption";
+import { IUserDialogInfo } from "@spt-aki/models/eft/profile/IAkiProfile";
+import { ISendMessageRequest } from "@spt-aki/models/eft/dialog/ISendMessageRequest";
+import { DependencyContainer } from "tsyringe";
+import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { MailSendService } from "@spt-aki/services/MailSendService";
+import { IChatCommand } from "@spt-aki/helpers/Dialogue/Commando/IChatCommand";
+import { CommandTweakOption } from "./TweakOptions/CommandTweakOption";
+import { PMCConversionTweakOption } from "./TweakOptions/PMCConversionTweakOption";
 
 export class TweaksChatCommand implements IChatCommand
 {
@@ -80,8 +80,7 @@ export class TweaksChatCommand implements IChatCommand
         try
         {
             this.mailSendService.sendUserMessageToPlayer(sessionId, commandHandler, isGet ? option.getValue(subTokens) : option.setValue(subTokens))
-        }
-        catch (e)
+        } catch (e)
         {
             this.mailSendService.sendUserMessageToPlayer(sessionId, commandHandler, `Failed to process command: ${e}`)
         }
