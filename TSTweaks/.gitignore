@@ -8,5 +8,5 @@ package-lock.json
 updateTypes.ps1
 NewTypes/
 tmp
-config
+./config
 *.bak
