@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPTTweaks", "SPTTweaks\SPTTweaks.csproj", "{A20FB080-29B8-42C9-B9FA-E7B999F8A290}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
