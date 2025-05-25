@@ -22,5 +22,7 @@
 /config
 /config.bak
 /tmp
+/obj
 *.js
 *.js.map
+*.esproj

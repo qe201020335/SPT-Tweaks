@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPTTweaks", "SPTTweaks\SPTTweaks.csproj", "{A20FB080-29B8-42C9-B9FA-E7B999F8A290}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "TSTweaks", "TSTweaks\TSTweaks.esproj", "{B2F1232E-1573-4D3D-9C29-8061881368F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A20FB080-29B8-42C9-B9FA-E7B999F8A290}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2F1232E-1573-4D3D-9C29-8061881368F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2F1232E-1573-4D3D-9C29-8061881368F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2F1232E-1573-4D3D-9C29-8061881368F5}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2F1232E-1573-4D3D-9C29-8061881368F5}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

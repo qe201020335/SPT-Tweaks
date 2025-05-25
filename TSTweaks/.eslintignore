@@ -3,6 +3,7 @@
 /tmp
 /dist
 /types
+obj/
 
 # Exclude these filetypes from linting
 *.json
