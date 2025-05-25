@@ -2,6 +2,7 @@
 node_modules
 dist/
 types/
+obj/
 
 # Exclude these filetypes from linting
 *.json
