@@ -1,0 +1,12 @@
+.idea
+dist
+node_modules
+src/**/*.js
+src/**/*.js.map
+.DS_Store
+package-lock.json
+updateTypes.ps1
+NewTypes/
+tmp
+config
+*.bak
