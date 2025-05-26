@@ -1,9 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>false</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <ModsDirectoryPath>$(SPTPath)\user\mods\$(MSBuildProjectName)</ModsDirectoryPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0-pre.20250818.1738" />
+  </ItemGroup>
+
+  <Target Name="CopyToSPT" AfterTargets="AfterBuild" Condition="'$(SPTPath)' != ''">
+    <Message Importance="high" Text="Copying mods to $(ModsDirectoryPath)" />
+    <ItemGroup>
+      <FilesToCopy Include="$(OutputPath)$(TargetName)$(TargetExt)" />
+      <FilesToCopy Include="$(OutputPath)$(TargetName).pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ModsDirectoryPath)" ContinueOnError="false" />
+    <Message Text="Files copied" />
+  </Target>
+
+  <Target Name="MakeZip" AfterTargets="AfterBuild">
+    <Message Importance="high" Text="Creating mods zip" />
+    <ItemGroup>
+      <FilesToCopy Include="$(OutputPath)$(TargetName)$(TargetExt)" />
+      <FilesToCopy Include="$(OutputPath)$(TargetName).pdb" />
+    </ItemGroup>
+    <RemoveDir Directories="$(OutputPath)\Artifact" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(OutputPath)\Artifact\user\mods\$(MSBuildProjectName)" ContinueOnError="false" />
+    <ZipDirectory DestinationFile="$(OutputPath)\$(TargetName)-$(Version).zip" SourceDirectory="$(OutputPath)\Artifact" Overwrite="true" />
+    <Message Text="Plugin Zipped" />
+  </Target>
 
 </Project>
