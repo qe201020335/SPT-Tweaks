@@ -6,4 +6,27 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\server-csharp\Libraries\SPTarkov.Server.Core\SPTarkov.Server.Core.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ModsDirectoryPath>$(MSBuildProjectDirectory)\..\server-csharp\SPTarkov.Server\bin\$(Configuration)\$(TargetFramework)\user\mods\$(MSBuildProjectName)</ModsDirectoryPath>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="AfterBuild">
+    <Message Importance="high" Text="Copying mods to $(ModsDirectoryPath)" />
+    <ItemGroup>
+      <FilesToCopy Include="$(OutputPath)$(TargetName)$(TargetExt)" />
+      <FilesToCopy Include="$(OutputPath)$(TargetName).pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ModsDirectoryPath)" ContinueOnError="false" />
+    <Message Importance="high" Text="Files copied" />
+    <Message Importance="high" Text="Creating Zip" />
+    <RemoveDir Directories="$(OutputPath)\Artifact" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(OutputPath)\Artifact\user\mods\$(MSBuildProjectName)" ContinueOnError="false" />
+    <ZipDirectory DestinationFile="$(OutputPath)\$(TargetName)-$(Version).zip" SourceDirectory="$(OutputPath)\Artifact" Overwrite="true"/>
+    <Message Importance="high" Text="Plugin Zipped" />
+  </Target>
+
 </Project>
