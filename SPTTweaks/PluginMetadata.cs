@@ -1,7 +1,9 @@
-﻿using SPTarkov.Server.Core.Models.Spt.Mod;
+﻿using JetBrains.Annotations;
+using SPTarkov.Server.Core.Models.Spt.Mod;
 
 namespace SPTTweaks;
 
+[UsedImplicitly]
 public record PluginMetadata : AbstractModMetadata
 {
     public override string? Name { get; set; } = "SPTTweaks";

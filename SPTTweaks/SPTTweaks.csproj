@@ -10,6 +10,10 @@
     <ProjectReference Include="..\server-csharp\Libraries\SPTarkov.Server.Core\SPTarkov.Server.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.1.0-eap1" />
+  </ItemGroup>
+
   <PropertyGroup>
     <ModsDirectoryPath>$(MSBuildProjectDirectory)\..\server-csharp\SPTarkov.Server\bin\$(Configuration)\$(TargetFramework)\user\mods\$(MSBuildProjectName)</ModsDirectoryPath>
   </PropertyGroup>
