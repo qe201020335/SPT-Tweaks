@@ -1,0 +1,4 @@
+[submodule "server-csharp"]
+	path = server-csharp
+	url = https://github.com/sp-tarkov/server-csharp.git
+	branch = develop
