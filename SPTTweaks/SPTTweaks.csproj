@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0-pre.20250818.1738" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0-pre.20250917.1349" />
   </ItemGroup>
 
   <Target Name="CopyToSPT" AfterTargets="AfterBuild" Condition="'$(SPTPath)' != ''">
