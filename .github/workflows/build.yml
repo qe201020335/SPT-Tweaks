@@ -1,0 +1,26 @@
+﻿name: Build C# Mod
+
+on:
+  push:
+    paths:
+      - 'SPTweaks/**'
+      - '.github/workflows/build.yml'
+      - 'SPTTweaks.sln'
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 9
+      - run: dotnet restore ${{ github.workspace }}/SPTTweaks/SPTTweaks.csproj
+      - run: dotnet build -c Release ${{ github.workspace }}/SPTTweaks/SPTTweaks.csproj
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SPTTweaks
+          path: ${{ github.workspace }}/SPTTweaks/bin/Release/net9.0/Artifact/**
+          if-no-files-found: error
+          compression-level: 9
