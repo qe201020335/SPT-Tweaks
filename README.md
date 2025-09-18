@@ -2,8 +2,8 @@
 
 A collection of tweaks for the [SPT](https://sp-tarkov.com/) server.
 
-TSTweaks: TypeScript version of this mod for SPT 3.9.x
-SPTTweaks: C# version of this mod for SPT 4.x+ (WIP)
+- TSTweaks: TypeScript version of this mod for SPT 3.9.x
+- SPTTweaks: C# version of this mod for SPT 4.x+ (WIP)
 
 ## Auto Copy to Game Folder (SPT 4.x+)
 
