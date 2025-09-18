@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <None Include="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
+    <None Include="$(ModsDirectoryPath)\config\config.json" Condition="Exists('$(ModsDirectoryPath)\config\config.json')" />
   </ItemGroup>
 
   <ItemGroup>
