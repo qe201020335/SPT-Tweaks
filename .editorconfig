@@ -1,9 +1,18 @@
 [*]
 charset = utf-8
-trim_trailing_whitespace = false
-insert_final_newline = false
+trim_trailing_whitespace = true
+insert_final_newline = true
 indent_style = space
 indent_size = 4
+max_line_length = 120
+tab_width = 4
+ij_continuation_indent_size = 8
+ij_formatter_off_tag = @formatter:off
+ij_formatter_on_tag = @formatter:on
+ij_formatter_tags_enabled = true
+ij_smart_tabs = false
+ij_visual_guides =
+ij_wrap_on_typing = false
 
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = false
@@ -52,6 +61,7 @@ resharper_braces_for_foreach = required
 resharper_braces_for_ifelse = required_for_multiline_statement
 resharper_braces_for_while = required
 resharper_constructor_or_destructor_body = expression_body
+resharper_cpp_insert_final_newline = true
 resharper_formatter_off_tag = @formatter:off
 resharper_formatter_on_tag = @formatter:on
 resharper_formatter_tags_enabled = true
@@ -59,6 +69,7 @@ resharper_local_function_body = expression_body
 resharper_method_or_operator_body = expression_body
 resharper_place_accessorholder_attribute_on_same_line = false
 resharper_place_field_attribute_on_same_line = false
+resharper_resx_max_line_length = 2147483647
 resharper_show_autodetect_configure_formatting_tip = false
 resharper_use_indent_from_vs = false
 
@@ -87,31 +98,63 @@ resharper_web_config_module_not_resolved_highlighting = warning
 resharper_web_config_type_not_resolved_highlighting = warning
 resharper_web_config_wrong_module_highlighting = warning
 
-[{*.yaml,*.yml}]
+[{*.ant,*.appxmanifest,*.axml,*.bsml,*.cscfg,*.csdef,*.disco,*.dotsettings,*.filelayout,*.fxml,*.jhm,*.jnlp,*.jrxml,*.manifest,*.myapp,*.nuspec,*.rng,*.stylecop,*.svcmap,*.tld,*.wadcfgx,*.webref,*.wsdl,*.xml,*.xsd,*.xsl,*.xslt,*.xul,StyleCop.Cache}]
 indent_style = space
 indent_size = 2
-
-[{*.bash,*.sh,*.zsh}]
-indent_style = space
-indent_size = 2
+ij_xml_align_attributes = true
+ij_xml_align_text = false
+ij_xml_attribute_wrap = normal
+ij_xml_block_comment_add_space = false
+ij_xml_block_comment_at_first_column = true
+ij_xml_keep_blank_lines = 2
+ij_xml_keep_indents_on_empty_lines = false
+ij_xml_keep_line_breaks = true
+ij_xml_keep_line_breaks_in_text = true
+ij_xml_keep_whitespaces = false
+ij_xml_keep_whitespaces_around_cdata = preserve
+ij_xml_keep_whitespaces_inside_cdata = false
+ij_xml_line_comment_at_first_column = true
+ij_xml_space_after_tag_name = false
+ij_xml_space_around_equals_in_attribute = false
+ij_xml_space_inside_empty_tag = true
+ij_xml_text_wrap = normal
+ij_xml_use_custom_settings = false
 
 [{*.har,*.jsb2,*.jsb3,*.json,*.jsonc,*.postman_collection,*.postman_collection.json,*.postman_environment,*.postman_environment.json,.babelrc,.eslintrc,.prettierrc,.stylelintrc,.ws-context,jest.config}]
 indent_style = space
 indent_size = 2
+ij_json_array_wrapping = split_into_lines
+ij_json_keep_blank_lines_in_code = 0
+ij_json_keep_indents_on_empty_lines = false
+ij_json_keep_line_breaks = true
+ij_json_keep_trailing_comma = false
+ij_json_object_wrapping = split_into_lines
+ij_json_property_alignment = do_not_align
+ij_json_space_after_colon = true
+ij_json_space_after_comma = true
+ij_json_space_before_colon = false
+ij_json_space_before_comma = false
+ij_json_spaces_within_braces = false
+ij_json_spaces_within_brackets = false
+ij_json_wrap_long_lines = false
 
-[{*.jshintrc,jshint.json}]
+[{*.yaml,*.yml}]
 indent_style = space
 indent_size = 2
+ij_yaml_align_values_properties = do_not_align
+ij_yaml_autoinsert_sequence_marker = true
+ij_yaml_block_mapping_on_new_line = false
+ij_yaml_indent_sequence_value = true
+ij_yaml_keep_indents_on_empty_lines = false
+ij_yaml_keep_line_breaks = true
+ij_yaml_line_comment_add_space = false
+ij_yaml_line_comment_add_space_on_reformat = false
+ij_yaml_line_comment_at_first_column = true
+ij_yaml_sequence_on_new_line = false
+ij_yaml_space_before_colon = false
+ij_yaml_spaces_within_braces = true
+ij_yaml_spaces_within_brackets = true
 
-[{tsconfig.app.json,tsconfig.base.json,tsconfig.e2e.json,tsconfig.editor.json,tsconfig.json,tsconfig.lib.json,tsconfig.spec.json,tsconfig.test.json}]
+[{*.androidproj,*.ccproj,*.csproj}]
 indent_style = space
 indent_size = 2
-
-[*.map]
-indent_style = space
-indent_size = 2
-
-[*.{appxmanifest,asax,ascx,aspx,axaml,blockshader,c,c++,c++m,cc,ccm,cginc,compute,cp,cpp,cppm,cs,cshtml,cu,cuh,cxx,cxxm,dtd,fs,fsi,fsscript,fsx,fx,fxh,h,h++,hh,hlsl,hlsli,hlslinc,hp,hpp,hxx,icc,inc,inl,ino,ipp,ixx,master,ml,mli,mpp,mq4,mq5,mqh,mxx,nuspec,paml,razor,resw,resx,shader,shaderFoundry,skin,tcc,tpp,urtshader,usf,ush,uxml,vb,xaml,xamlx,xoml,xsd}]
-indent_style = space
-indent_size = 4
-tab_width = 4
