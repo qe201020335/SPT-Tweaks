@@ -6,9 +6,11 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 namespace SPTTweaks;
 
 [UsedImplicitly]
-public partial record PluginMetadata : AbstractModMetadata
+internal partial record PluginMetadata : AbstractModMetadata
 {
-    public override string ModGuid { get; init; } = "com.github.qe201020335.spttweaks";
+    public const string Guid = "com.github.qe201020335.spttweaks";
+
+    public override string ModGuid { get; init; } = Guid;
     public override string Name { get; init; } = "SPTTweaks";
     public override string Author { get; init; } = "qe201020335";
     public override List<string>? Contributors { get; init; }
